@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Participación · Northwood Worship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700&family=Montserrat:wght@400;500;600&display=swap">
+<style>
+/* Layout: encabezado → controles (equipo, eventos, periodo) → indicadores → barras apiladas por persona → tabla → notas */
+:root{
+  --bg:#f5f6f6; --surface:#ffffff; --fg:#1c1e1e; --body:#4a4d4d; --muted:#6e7272; --line:#dcdede; --track:#ebeded;
+  --teal:#00babc; --teal-ink:#00696b; --on-teal:#062b2b; --orange-ink:#c4491d;
+  --display:"League Spartan","Helvetica Neue",Arial,sans-serif;
+  --body-font:"Montserrat","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141616; --surface:#1c1e1e; --fg:#f0f2f2; --body:#c9cdcd; --muted:#9a9d9d; --line:#2f3333; --track:#262929;
+  --teal:#00babc; --teal-ink:#5fd6d7; --on-teal:#062b2b; --orange-ink:#f68a62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141616; --surface:#1c1e1e; --fg:#f0f2f2; --body:#c9cdcd; --muted:#9a9d9d; --line:#2f3333; --track:#262929;
+  --teal:#00babc; --teal-ink:#5fd6d7; --on-teal:#062b2b; --orange-ink:#f68a62; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body-font);font-size:15px;line-height:1.5;margin:0}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px;display:flex;flex-direction:column;gap:22px}
+.top{height:6px;background:var(--teal);margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)))}
+header{display:flex;flex-direction:column;gap:6px;padding-top:18px}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-ink);font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,42px);line-height:1;margin:0;letter-spacing:-.01em}
+h2{font-family:var(--display);font-weight:700;font-size:20px;margin:0}
+.sub{color:var(--body);margin:0;font-size:14px}
+.controls{display:flex;flex-direction:column;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;min-width:72px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface);flex-wrap:wrap}
+.seg button{font:inherit;font-size:13.5px;font-weight:500;padding:8px 14px;border:0;background:none;color:var(--fg);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--teal);color:var(--on-teal)}
+select{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--teal-ink);outline-offset:1px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.kpi b{display:block;font-family:var(--display);font-weight:700;font-size:28px;line-height:1;color:var(--teal-ink);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12.5px;color:var(--body)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--body)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px}
+.group{display:flex;flex-direction:column;gap:6px}
+.group h3{font-family:var(--display);font-size:15px;font-weight:700;margin:8px 0 2px;color:var(--teal-ink)}
+.bar-row{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 40px;gap:10px;align-items:center}
+.bar-row .n{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{display:flex;height:18px;gap:2px;min-width:0}
+.seg-b{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;overflow:hidden;white-space:nowrap;min-width:3px}
+.seg-b:first-child{border-radius:3px 0 0 3px}.seg-b:last-child{border-radius:0 3px 3px 0}.seg-b:only-child{border-radius:3px}
+.tot{font-family:var(--display);font-weight:700;font-size:15px;text-align:right;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.bar-row{grid-template-columns:minmax(0,1fr) 36px;row-gap:3px;margin-bottom:10px}.bar-row .track{grid-column:1/-1;grid-row:2}.bar-row .tot{grid-row:1;grid-column:2}}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-size:12px;color:var(--muted);font-weight:600;cursor:pointer;user-select:none;background:var(--surface);position:sticky;top:0}
+th[aria-sort] {color:var(--teal-ink)}
+tr:last-child td{border-bottom:0}
+.dim{color:var(--muted)}
+.warn{color:var(--orange-ink);font-weight:600}
+.notes{font-size:13px;color:var(--body);display:flex;flex-direction:column;gap:6px;max-width:80ch}
+.notes p{margin:0}
+.empty{padding:30px 0;color:var(--muted);text-align:center}
+footer{font-size:12px;color:var(--muted)}
+@media (max-width:560px){
+  body{font-size:16px}.sub{font-size:15px}.seg button,select{font-size:15px;padding:10px 14px}
+  .bar-row .n{font-size:15px}.track{height:20px}.seg-b{font-size:12px}.tot{font-size:17px}
+  .legend{font-size:14px}.kpi span{font-size:13.5px}table{font-size:14.5px}.notes{font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"></div>
+  <header>
+    <div class="eyebrow">Northwood Worship · Equipo de alabanza</div>
+    <h1>Participación</h1>
+    <p class="sub">Cuántas veces ha servido cada persona en voces, banda y sonido. Datos de Planning Center, actualizados cada lunes. Última actualización: __UPDATED__.</p>
+  </header>
+
+  <div class="controls">
+    <div class="row"><span class="label">Equipo</span>
+      <div class="seg" id="team" role="group" aria-label="Equipo">
+        <button type="button" data-v="V" aria-pressed="true">Voces</button>
+        <button type="button" data-v="B" aria-pressed="false">Banda</button>
+        <button type="button" data-v="S" aria-pressed="false">Sonido</button>
+        <button type="button" data-v="ALL" aria-pressed="false">Todos</button>
+      </div></div>
+    <div class="row"><span class="label">Eventos</span>
+      <div class="seg" id="events" role="group" aria-label="Eventos">
+        <button type="button" data-v="sun" aria-pressed="true">Solo domingos</button>
+        <button type="button" data-v="all" aria-pressed="false">Todos los eventos</button>
+      </div></div>
+    <div class="row"><span class="label">Periodo</span>
+      <select id="period" aria-label="Periodo"></select>
+    </div>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section class="group" aria-labelledby="chart-h">
+    <h2 id="chart-h">Participación por persona</h2>
+    <div class="legend" id="legend"></div>
+    <div id="chart"></div>
+  </section>
+
+  <section class="group" aria-labelledby="table-h">
+    <h2 id="table-h">Detalle</h2>
+    <div class="tablewrap"><table id="table"></table></div>
+  </section>
+
+  <div class="notes">
+    <p><b>Cómo se cuenta.</b> Cada persona cuenta una vez por evento. Si en el mismo evento sirvió en dos posiciones (por ejemplo, líder y coro, o voz y teclado), se cuenta una sola vez. En voces, si fue líder y coro el mismo día, cuenta como líder. Solo se cuentan asignaciones confirmadas; las pendientes y las declinadas aparecen aparte en el detalle.</p>
+    <p><b>Co-dirigió</b> quiere decir que ese evento tuvo más de un líder de alabanza confirmado. En "Todos", "Varios equipos" es un evento en el que la persona sirvió en más de un equipo.</p>
+    <p id="evnote"></p>
+  </div>
+  <footer>Fuente: Planning Center Services. Página privada del equipo de alabanza de Iglesia Northwood.</footer>
+</div>
+
+<script>
+const D = __DATA__;
+const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const fmt=d=>{const [y,m,dd]=d.split("-");return `${+dd} ${MES[+m-1]} ${y}`;};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const KIND_NAME={V:"Voces",B:"Banda",S:"Sonido"};
+const isLeaderPos = n => /worship leader|l[ií]der de alabanza|lead vocal|^l[ií]der$/i.test(n);
+const PALETTE=["#00696b","#00babc","#f15d2c","#fab094","#0b86c4","#93d5f8","#6e7272","#b4b8b8"];
+const PALETTE_DARK=["#4fd0d1","#00babc","#f68a62","#fcd2c1","#5cbef3","#c4e8fb","#9a9d9d","#4a4d4d"];
+const dark=()=>document.documentElement.dataset.theme==="dark"||(document.documentElement.dataset.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+const onColor=hex=>{const h=hex.replace("#","");const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (0.299*r+0.587*g+0.114*b)>150?"#1c1e1e":"#ffffff";};
+
+const today=D.gen, y=+today.slice(0,4);
+const PERIODS=[
+  {id:"ytd",label:`${y} (hasta hoy)`,from:`${y}-01-01`,to:today},
+  {id:"prev",label:`${y-1}`,from:`${y-1}-01-01`,to:`${y-1}-12-31`},
+  {id:"12m",label:"Últimos 12 meses",from:shift(today,-365),to:today},
+  {id:"3m",label:"Últimos 3 meses",from:shift(today,-91),to:today},
+];
+function shift(d,days){const t=new Date(d+"T12:00:00");t.setDate(t.getDate()+days);return t.toISOString().slice(0,10);}
+const periodSel=document.getElementById("period");
+PERIODS.forEach(p=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.label;periodSel.append(o);});
+
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+const state=Object.assign({team:"V",events:"sun",period:"ytd",sort:"total",dir:-1},store.get("nw-part",{}));
+periodSel.value=state.period;
+const sundaySet=new Set(D.sunday);
+
+function seg(id,key){document.querySelectorAll(`#${id} button`).forEach(b=>{b.addEventListener("click",()=>{state[key]=b.dataset.v;save();render();});});}
+seg("team","team");seg("events","events");
+periodSel.addEventListener("change",()=>{state.period=periodSel.value;save();render();});
+function save(){store.set("nw-part",state);}
+
+function compute(){
+  const P=PERIODS.find(p=>p.id===state.period)||PERIODS[0];
+  const planOk=D.plans.map(([d,si])=>d>=P.from&&d<=P.to&&(state.events==="all"||sundaySet.has(si)));
+  const nEvents=planOk.filter(Boolean).length;
+  // agrupar asignaciones por (persona, evento)
+  const byPP=new Map(); const pend=new Map(), decl=new Map();
+  const leadersPerPlan=new Map();
+  for(const [pi,pl,po,st] of D.a){
+    if(!planOk[pl]) continue;
+    const [kind,pos]=D.pos[po];
+    if(state.team!=="ALL"&&kind!==state.team) continue;
+    const key=pi+":"+pl;
+    if(st!=="C"){ const m=st==="D"?decl:pend; if(!m.has(pi)) m.set(pi,new Set()); m.get(pi).add(pl); continue; }
+    if(!byPP.has(key)) byPP.set(key,{pi,pl,kinds:new Set(),pos:new Set(),lead:false});
+    const o=byPP.get(key); o.kinds.add(kind); o.pos.add(pos);
+    if(kind==="V"&&isLeaderPos(pos)){o.lead=true; if(!leadersPerPlan.has(pl)) leadersPerPlan.set(pl,new Set()); leadersPerPlan.get(pl).add(pi);}
+  }
+  // categoría de cada participación
+  const cats=new Map(); const persons=new Map();
+  const add=(pi,cat,pl)=>{ if(!persons.has(pi)) persons.set(pi,{pi,c:{},total:0,last:"",leader:false}); const p=persons.get(pi); p.c[cat]=(p.c[cat]||0)+1; p.total++; const d=D.plans[pl][0]; if(d>p.last) p.last=d; cats.set(cat,(cats.get(cat)||0)+1); };
+  for(const o of byPP.values()){
+    let cat;
+    if(state.team==="V"){ if(o.lead){ cat=(leadersPerPlan.get(o.pl).size>1)?"Co-dirigió":"Dirigió solo/a"; } else cat="Coros (BGVS)"; }
+    else if(state.team==="ALL"){ cat=o.kinds.size>1?"Varios equipos":KIND_NAME[[...o.kinds][0]]; }
+    else { cat=o.pos.size>1?"Varias posiciones":[...o.pos][0]; }
+    add(o.pi,cat,o.pl);
+    if(o.lead) persons.get(o.pi).leader=true;
+  }
+  // orden de categorías
+  let order;
+  if(state.team==="V") order=["Dirigió solo/a","Co-dirigió","Coros (BGVS)"];
+  else if(state.team==="ALL") order=["Voces","Banda","Sonido","Varios equipos"];
+  else { order=[...cats.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]); const multi=order.indexOf("Varias posiciones"); if(multi>=0){order.splice(multi,1);order.push("Varias posiciones");} }
+  order=order.filter(c=>cats.has(c));
+  if(order.length>8){ const keep=order.slice(0,7); const rest=new Set(order.slice(7)); for(const p of persons.values()){ let n=0; for(const c of rest){ n+=p.c[c]||0; delete p.c[c]; } if(n) p.c["Otras"]=(p.c["Otras"]||0)+n; } order=[...keep,"Otras"]; }
+  const pal=dark()?PALETTE_DARK:PALETTE;
+  let colors;
+  if(state.team==="V") colors={"Dirigió solo/a":pal[0],"Co-dirigió":pal[1],"Coros (BGVS)":pal[7]};
+  else if(state.team==="ALL") colors={"Voces":pal[0],"Banda":pal[2],"Sonido":pal[4],"Varios equipos":pal[6]};
+  else { colors={}; const cyc=[0,2,4,1,3,5,6,7]; order.forEach((c,i)=>colors[c]=pal[cyc[i%8]]); if(colors["Varias posiciones"]) colors["Varias posiciones"]=pal[6]; if(colors["Otras"]) colors["Otras"]=pal[7]; }
+  const all=new Set([...persons.keys(),...pend.keys(),...decl.keys()]);
+  const rows=[...all].map(pi=>{const p=persons.get(pi)||{pi,c:{},total:0,last:"",leader:false};p.pend=(pend.get(pi)||new Set()).size;p.decl=(decl.get(pi)||new Set()).size;p.name=D.people[pi];return p;});
+  const leadPlans=[...leadersPerPlan.keys()].length;
+  return {P,nEvents,rows,order,colors,leadPlans};
+}
+
+function render(){
+  document.querySelectorAll("#team button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===state.team)));
+  document.querySelectorAll("#events button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===state.events)));
+  const R=compute();
+  const served=R.rows.filter(r=>r.total>0);
+  const totalPart=served.reduce((s,r)=>s+r.total,0);
+  const kpis=[
+    [R.nEvents, state.events==="sun"?"domingos en el periodo":"eventos en el periodo"],
+    [served.length, "personas sirvieron"],
+    [totalPart, "participaciones confirmadas"],
+    [served.length?(totalPart/served.length).toFixed(1):"0", "promedio por persona"],
+  ];
+  if(state.team==="V") kpis[3]=[R.leadPlans, state.events==="sun"?"domingos con líder":"eventos con líder"];
+  document.getElementById("kpis").innerHTML=kpis.map(([n,l])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("");
+  document.getElementById("legend").innerHTML=R.order.map(c=>`<span><i style="background:${R.colors[c]}"></i>${esc(c)}</span>`).join("");
+
+  const max=Math.max(1,...served.map(r=>r.total));
+  const bar=r=>`<div class="bar-row" title="${esc(r.name)}: ${R.order.filter(c=>r.c[c]).map(c=>c+" "+r.c[c]).join(", ")}"><span class="n">${esc(r.name)}</span><div class="track" role="img" aria-label="${esc(r.name)}: ${r.total} en total, ${R.order.filter(c=>r.c[c]).map(c=>r.c[c]+" "+c).join(", ")}">${R.order.filter(c=>r.c[c]).map(c=>`<span class="seg-b" style="width:${r.c[c]/max*100}%;background:${R.colors[c]};color:${onColor(R.colors[c])}">${r.c[c]>=2?r.c[c]:""}</span>`).join("")}</div><span class="tot">${r.total}</span></div>`;
+  const byTotal=(a,b)=>b.total-a.total||a.name.localeCompare(b.name,"es");
+  let html="";
+  if(!served.length) html=`<div class="empty">Nadie tiene participaciones confirmadas con estos filtros.</div>`;
+  else if(state.team==="V"){
+    const L=served.filter(r=>r.leader).sort(byTotal), O=served.filter(r=>!r.leader).sort(byTotal);
+    html=(L.length?`<h3>Líderes de alabanza</h3>${L.map(bar).join("")}`:"")+(O.length?`<h3>Coros</h3>${O.map(bar).join("")}`:"");
+  } else html=served.sort(byTotal).map(bar).join("");
+  document.getElementById("chart").innerHTML=html;
+
+  // tabla
+  const cols=[["name","Persona"],["total","Total"],...R.order.map(c=>["c:"+c,c]),["last","Última vez"],["pend","Pendientes"],["decl","Declinó"]];
+  const val=(r,k)=>k.startsWith("c:")?(r.c[k.slice(2)]||0):r[k];
+  const rows=[...R.rows].sort((a,b)=>{const va=val(a,state.sort),vb=val(b,state.sort);if(typeof va==="string")return state.dir*(va.localeCompare(vb,"es"));return state.dir*((va||0)-(vb||0))||a.name.localeCompare(b.name,"es");});
+  document.getElementById("table").innerHTML=`<thead><tr>${cols.map(([k,l])=>`<th scope="col" data-k="${esc(k)}"${state.sort===k?` aria-sort="${state.dir<0?"descending":"ascending"}"`:""}>${esc(l)}${state.sort===k?(state.dir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td><b>${r.total}</b></td>${R.order.map(c=>`<td class="${r.c[c]?"":"dim"}">${r.c[c]||0}</td>`).join("")}<td>${r.last?fmt(r.last):"—"}</td><td class="${r.pend?"warn":"dim"}">${r.pend}</td><td class="${r.decl?"warn":"dim"}">${r.decl}</td></tr>`).join("")}</tbody>`;
+  document.querySelectorAll("#table th").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.k; if(state.sort===k) state.dir*=-1; else {state.sort=k; state.dir=(k==="name"?1:-1);} save(); render();}));
+  const evTypes=state.events==="sun"?D.sunday.map(i=>D.st[i]):D.st;
+  document.getElementById("evnote").innerHTML=`<b>Eventos incluidos:</b> ${esc(evTypes.join(", "))} · ${esc(R.P.label)} (${fmt(R.P.from)} – ${fmt(R.P.to)}).`;
+}
+render();
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+</script>
+</body>
+</html>
