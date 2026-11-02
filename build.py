@@ -221,13 +221,27 @@ def load_levels(pids):
     Vocals - Range, Vocals - Level, Vocals - Harmony (selección múltiple) y Vocals - Stage Presence.
     Si alguien tiene dos tags de Range, Level o Stage Presence, se usa el más alto (en Range, el primero) y se avisa.
     """
+    # mapa tag -> grupo, leído de todos los grupos de tags de Services (no depende de "include" por persona)
+    tag_group, grupos = {}, []
+    for page in paginate("/tag_groups?include=tags&per_page=100", allow_404=True):
+        tags_inc = {x["id"]: x for x in page.get("included", []) if x.get("type") == "Tag"}
+        for g in page["data"]:
+            gname = norm(g["attributes"].get("name"))
+            grupos.append(g["attributes"].get("name"))
+            ids = [t["id"] for t in (((g.get("relationships") or {}).get("tags") or {}).get("data") or [])]
+            if not ids:
+                for tp in paginate(f"/tag_groups/{g['id']}/tags?per_page=100", allow_404=True):
+                    ids += [t["id"] for t in tp["data"]]
+            for tid in ids:
+                tag_group[tid] = gname
+    print(f"Grupos de tags en Services: {grupos}")
     grupos_vistos, out, dobles = set(), {}, []
     for pid in pids:
         vals = {}
         for page in paginate(f"/people/{pid}/tags?include=tag_group&per_page=100", allow_404=True):
             groups = {x["id"]: norm(x["attributes"].get("name")) for x in page.get("included", []) if x.get("type") == "TagGroup"}
             for t in page["data"]:
-                gname = groups.get(rel_id(t, "tag_group"), "")
+                gname = groups.get(rel_id(t, "tag_group")) or tag_group.get(t["id"], "")
                 for k, want in LEVEL_FIELDS.items():
                     if gname == want or gname.startswith(want):
                         grupos_vistos.add(k)
