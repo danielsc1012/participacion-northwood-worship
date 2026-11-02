@@ -1016,14 +1016,18 @@ const store={get(k,d){try{const v=localStorage.getItem('nwa.'+k);return v===null
              set(k,v){try{localStorage.setItem('nwa.'+k,JSON.stringify(v));}catch(e){}},
              del(k){try{localStorage.removeItem('nwa.'+k);}catch(e){}}};
 
-// rango: 1 Bajo, 2 Barítono, 3 Tenor, 4 Alto, 5 Mezzo-Soprano, 6 Soprano
-const RANGO=['Sin rango','Bajo','Barítono','Tenor','Alto','Mezzo-Soprano','Soprano'];
-const RSH=['—','Bajo','Barít.','Tenor','Alto','Mezzo','Sopr.'];
+// rango (tags "Vocals - Range"): 1 Bass, 2 Baritone, 3 Tenor, 4 Alto, 5 Mezzo Soprano, 6 Soprano
+const RANGO=['Sin rango','Bass','Baritone','Tenor','Alto','Mezzo Soprano','Soprano'];
+const RSH=['—','Bass','Barit.','Tenor','Alto','Mezzo','Sopr.'];
 const REG=['x','g','m','a','g','m','a'];          // registro: grave, medio, agudo (dentro de cada tipo de voz)
 const REGL={g:'grave',m:'media',a:'aguda'};
 const HOMBRE=r=>r>=1&&r<=3;
-const LVL=['—','Bajo','Medio','Alto'];
-const ARM=['—','1ra','+2da','+3ra'];
+// "Vocals - Level" y "Vocals - Stage Presence": 1 In Progress, 2 Good, 3 Strong
+const LVL=['—','In Progress','Good','Strong'];
+// "Vocals - Harmony" (selección múltiple), en bits: First 1, Second 2, Third 4
+const ARMS=[[1,'First','1ra'],[2,'Second','2da'],[4,'Third','3ra']];
+const armLong=m=>m?ARMS.filter(([b])=>m&b).map(x=>x[1]).join(', '):'—';
+const armShort=m=>m?ARMS.filter(([b])=>m&b).map(x=>x[2]).join('·'):'—';
 const isLeaderPos=n=>/worship leader|l[ií]der de alabanza|lead vocal|^l[ií]der$/i.test(n);
 const lastName=n=>{const w=n.replace(/[.,]/g,'').split(/\s+/).filter(x=>!/^(jr|sr|ii|iii|iv)$/i.test(x));return w.length>1?w[w.length-1]:w[0]||'';};
 const byName=(a,b)=>lastName(a.n).localeCompare(lastName(b.n),'es',{sensitivity:'base'})||a.n.localeCompare(b.n,'es',{sensitivity:'base'});
@@ -1066,9 +1070,9 @@ function pcoOn(d){
 }
 
 // ---- piezas visuales ----
-const pips=(n,label)=>`<span title="${label}: ${LVL[n]}">${label.slice(0,4)}. <span class="pips" aria-label="${label}: ${LVL[n]}">${[1,2,3].map(k=>`<i class="${k<=n?'on':''}"></i>`).join('')}</span></span>`;
+const pips=(n,label)=>`<span title="${label}: ${LVL[n]}">${label==='Level'?'Level':'Stage'} <span class="pips" aria-label="${label}: ${LVL[n]}">${[1,2,3].map(k=>`<i class="${k<=n?'on':''}"></i>`).join('')}</span></span>`;
 const rchip=v=>`<span class="rg ${REG[rng(v)]}" title="${RANGO[rng(v)]}${rng(v)?' · voz '+REGL[REG[rng(v)]]:''}">${RSH[rng(v)]}</span>`;
-const lvls=v=>v.lv?`${pips(dev(v),'Desarrollo')}<span title="Armonización: ${ARM[arm(v)]}">Arm. <span class="harm">${ARM[arm(v)]}</span></span>${pips(pres(v),'Presencia')}`:'<span>Sin tags de niveles en Planning Center</span>';
+const lvls=v=>v.lv?`${pips(dev(v),'Level')}<span title="Harmony: ${armLong(arm(v))}">Arm. <span class="harm">${armShort(arm(v))}</span></span>${pips(pres(v),'Stage Presence')}`:'<span>Sin tags de niveles en Planning Center</span>';
 const editLink=v=>pcoUrl(v)?`<a class="edit" href="${pcoUrl(v)}" target="_blank" rel="noopener" title="Editar tags en Planning Center Services" onclick="event.stopPropagation()">editar</a>`:'';
 function tags(v){let t='';const o=outOn(v,date);if(o&&o.part)t+=`<span class="tag">Parte del día · ${esc(o.lab)}</span>`;
   if(pcoSet.has(v.i))t+=`<span class="tag ev">Ya en PCO</span>`;if(c4(v)>=3)t+=`<span class="tag">${c4(v)} de 4 domingos</span>`;return t;}
@@ -1080,16 +1084,16 @@ function balance(ids){
   const rc=[0,0,0,0,0,0,0]; vs.forEach(v=>rc[rng(v)]++);
   const regs={g:0,m:0,a:0}; vs.forEach(v=>{if(rng(v))regs[REG[rng(v)]]++;});
   const men=vs.filter(v=>HOMBRE(rng(v))).length, women=vs.filter(v=>rng(v)>=4).length;
-  const a3=harm.filter(v=>arm(v)>=3).length, a2=harm.filter(v=>arm(v)>=2).length;
+  const a3=harm.filter(v=>arm(v)&4).length, a2=harm.filter(v=>arm(v)&2).length, ah=harm.filter(v=>arm(v)&6).length;
   const dist=f=>{const c=[0,0,0,0];wl.forEach(v=>c[f(v)]++);const xs=wl.map(f).filter(Boolean);return {c,avg:xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:0,n:xs.length};};
-  return {vs,wl,rc,regs,men,women,a3,a2,dv:dist(dev),pr:dist(pres),noLv:vs.filter(v=>!v.lv),heavy:vs.filter(v=>v.i!==lead&&c4(v)>=3)};
+  return {vs,wl,rc,regs,men,women,a3,a2,ah,dv:dist(dev),pr:dist(pres),noLv:vs.filter(v=>!v.lv),heavy:vs.filter(v=>v.i!==lead&&c4(v)>=3)};
 }
 function score(ids){
   const B=balance(ids);let s=0;
   s+=['g','m','a'].filter(k=>B.regs[k]).length*3;
   if(B.men&&B.women)s+=1.5;
   B.rc.forEach((n,r)=>{if(r&&n>2)s-=(n-2)*2;});
-  s+=(B.a3?4:0)+Math.min(B.a2,3)*1.2;
+  s+=(B.a3?3:0)+(B.a2?3:0)+Math.min(B.ah,3)*1;
   [B.dv,B.pr].forEach(x=>{if(x.c[3])s+=2.5;s+=x.avg*1.5;if(x.c[1]===1&&x.c[3])s+=.6;});
   B.vs.forEach(v=>{if(v.i!==lead)s-=c8(v)*.6;if(!v.lv)s-=1;});
   return s;
@@ -1168,8 +1172,8 @@ function distBar(x){const t=x.n||1;return `<div class="dist" aria-hidden="true">
 function lvlCheck(x,name){
   if(!x.n)return chk('na',name,'Sin datos todavía.');
   const parts=[3,2,1].filter(k=>x.c[k]).map(k=>`${LVL[k]} ${x.c[k]}`).join(' · ');
-  if(!x.c[3])return chk('wn',name,`${parts}. Falta alguien en nivel Alto que sostenga al grupo.`,distBar(x));
-  if(x.avg<1.7)return chk('wn',name,`${parts}. Promedio bajo; conviene sumar a alguien en nivel Medio o Alto.`,distBar(x));
+  if(!x.c[3])return chk('wn',name,`${parts}. Falta alguien Strong que sostenga al grupo.`,distBar(x));
+  if(x.avg<1.7)return chk('wn',name,`${parts}. Promedio bajo; conviene sumar a alguien Good o Strong.`,distBar(x));
   const grow=x.c[1]?` Incluye ${x.c[1]===1?'una voz':x.c[1]+' voces'} en desarrollo junto a voces más fuertes.`:'';
   return chk('ok',name,`${parts}.${grow}`,distBar(x));
 }
@@ -1200,10 +1204,11 @@ function renderTeam(){
     const hn=B.vs.filter(v=>v.i!==lead).length;
     if(!hn)h+=chk('na','Armonización','Agrega voces para ver la armonización.');
     else if(!B.vs.some(v=>v.i!==lead&&v.lv))h+=chk('na','Armonización','Sin datos todavía.');
-    else if(B.a3&&B.a2>=2)h+=chk('ok','Armonización',`${B.a3} cubre${B.a3>1?'n':''} la 3ra · ${B.a2} pueden hacer 2da o más.`);
-    else h+=chk('wn','Armonización',!B.a3?`Nadie cubre la 3ra voz${B.a2?` · ${B.a2} hacen 2da`:''}.`:`Solo ${B.a2} puede${B.a2>1?'n':''} armonizar (2da o más).`);
-    h+=lvlCheck(B.dv,'Desarrollo vocal');
-    h+=lvlCheck(B.pr,'Presencia escénica');
+    else{const det=`Third: ${B.a3} · Second: ${B.a2}`;
+      if(B.a3&&B.a2&&B.ah>=2)h+=chk('ok','Armonización',`${det}. Están cubiertas la 2da y la 3ra.`);
+      else h+=chk('wn','Armonización',`${det}. ${!B.a3&&!B.a2?'Nadie armoniza todavía.':!B.a3?'Nadie cubre la 3ra.':!B.a2?'Nadie cubre la 2da.':'Una sola persona cubre la 2da y la 3ra; suma a otra que armonice.'}`);}
+    h+=lvlCheck(B.dv,'Desarrollo vocal (Level)');
+    h+=lvlCheck(B.pr,'Presencia escénica (Stage Presence)');
     if(B.heavy.length)h+=chk('wn','Carga',`${B.heavy.map(v=>`${esc(v.n)} sirvió ${c4(v)} de los últimos 4 domingos`).join('; ')}.`);
     else h+=chk('ok','Carga','Nadie ha servido 3 o más de los últimos 4 domingos.');
     if(B.noLv.length)h+=chk('na','Sin niveles',`${B.noLv.map(v=>esc(v.n)).join(', ')}: el balance no los cuenta.`);
@@ -1211,22 +1216,22 @@ function renderTeam(){
   }
   h+=`<div class="acts"><button class="btn pri" id="asug" ${lead===null||n>=size?'disabled':''}>${n>1?'Completar':'Sugerir'} equipo</button><button class="btn" id="acopy" ${n?'':'disabled'}>Copiar lista</button><button class="btn" id="aclr" ${n?'':'disabled'}>Limpiar</button></div>
     <div class="toast" id="atoast" role="status"></div>
-    <p class="fine">${lead===null?'Escoge la voz líder para que la página pueda sugerir el resto. ':''}La sugerencia busca balance de rango y armonización, que haya alguien fuerte en desarrollo vocal y presencia escénica, y le da la oportunidad a quien ha servido menos. El equipo se guarda solo en este dispositivo: para programarlo, pásalo a Planning Center.</p>`;
+    <p class="fine">${lead===null?'Escoge la voz líder para que la página pueda sugerir el resto. ':''}La sugerencia busca balance de rango, que la 2da y la 3ra estén cubiertas, que haya alguien Strong en Level y Stage Presence, y le da la oportunidad a quien ha servido menos. El equipo se guarda solo en este dispositivo: para programarlo, pásalo a Planning Center.</p>`;
   $('#ateam').innerHTML=h;
   $('#amsticky').innerHTML=`<span><b>${n}/${size}</b> voces${lead!==null?` · líder: ${esc(VI.get(lead).n)}`:''}</span><a class="btn" href="#ateam">Ver equipo</a>`;
 }
 function renderLvTable(){
   const nl=V.filter(v=>!v.lv).length;
   $('#alvl').querySelector('summary').textContent=`Todas las voces y sus niveles (${V.length}${nl?` · ${nl} sin niveles`:''})`;
-  $('#alvt').innerHTML=`<table><thead><tr><th>Voz</th><th>Rango vocal</th><th>Desarrollo vocal</th><th>Armonización</th><th>Presencia escénica</th><th>Dirige</th><th></th></tr></thead><tbody>${V.map(v=>`<tr><td><b>${esc(v.n)}</b></td><td class="${rng(v)?'':'na'}">${RANGO[rng(v)]}</td><td class="${dev(v)?'':'na'}">${LVL[dev(v)]}</td><td class="${arm(v)?'':'na'}">${ARM[arm(v)]}</td><td class="${pres(v)?'':'na'}">${LVL[pres(v)]}</td><td>${v.lead?'Sí':''}</td><td>${editLink(v)}</td></tr>`).join('')}</tbody></table>`;
+  $('#alvt').innerHTML=`<table><thead><tr><th>Voz</th><th>Range</th><th>Level</th><th>Harmony</th><th>Stage Presence</th><th>Dirige</th><th></th></tr></thead><tbody>${V.map(v=>`<tr><td><b>${esc(v.n)}</b></td><td class="${rng(v)?'':'na'}">${RANGO[rng(v)]}</td><td class="${dev(v)?'':'na'}">${LVL[dev(v)]}</td><td class="${arm(v)?'':'na'}">${armLong(arm(v))}</td><td class="${pres(v)?'':'na'}">${LVL[pres(v)]}</td><td>${v.lead?'Sí':''}</td><td>${editLink(v)}</td></tr>`).join('')}</tbody></table>`;
 }
 function renderSetup(){
   const el=$('#asetup');const none=!V.some(v=>v.lv);
   if(!DATA.lvWarn&&!none){el.hidden=true;return;}
   el.hidden=false;
   el.innerHTML=`<b>${none?'Todavía no hay niveles registrados.':'Aviso sobre los niveles.'}</b> ${esc(DATA.lvWarn||'')}
-  <ol><li>En Planning Center Services, crea cuatro grupos de tags de persona: <b>Rango Vocal</b> (Bajo, Barítono, Tenor, Alto, Mezzo-Soprano, Soprano), <b>Desarrollo Vocal</b> (Bajo, Medio, Alto), <b>Armonización</b> (1ra, +2da, +3ra) y <b>Presencia Escénica</b> (Bajo, Medio, Alto).</li>
-  <li>Ponle a cada voz un tag de cada grupo (el enlace "editar" junto a cada nombre abre su perfil en Services). Para subir de nivel, se cambia el tag.</li>
+  <ol><li>En Planning Center Services, cada voz lleva un tag de estos grupos: <b>Vocals - Range</b> (Bass, Baritone, Tenor, Alto, Mezzo Soprano, Soprano), <b>Vocals - Level</b> (In Progress, Good, Strong) y <b>Vocals - Stage Presence</b> (In Progress, Good, Strong). En <b>Vocals - Harmony</b> se marcan todas las que hace (First, Second, Third).</li>
+  <li>El enlace "editar" junto a cada nombre abre su perfil en Services. Para subir de nivel, se cambia el tag.</li>
   <li>Los cambios se ven aquí a la mañana siguiente, o al correr la actualización a mano en GitHub.</li></ol>`;
 }
 let toastT;function toast(t){const el=$('#atoast');if(!el)return;el.textContent=t;clearTimeout(toastT);toastT=setTimeout(()=>{if($('#atoast'))$('#atoast').textContent='';},4000);}

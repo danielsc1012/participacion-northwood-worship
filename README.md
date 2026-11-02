@@ -4,11 +4,11 @@ Página privada (con contraseña) del liderazgo del equipo de alabanza, con tres
 
 - **Participación**: cuántas veces ha servido cada persona en **voces, banda y sonido**, con filtros por equipo, tipo de evento (solo domingos o todos) y periodo. Cada persona cuenta **una vez por evento**, aunque sirva en dos posiciones.
 - **Disponibilidad**: los blockout dates de quienes tienen una posición en voces, banda o sonido (calendario por mes, por persona, eventos, "¿Quién está disponible?" y próximas ausencias). No se muestran los motivos.
-- **Armar voces**: escoger fecha y voz líder, y armar las voces (5 o 6) buscando balance de rango vocal, armonización, desarrollo vocal y presencia escénica. Los niveles se leen de **tags de persona en Planning Center Services**, en cuatro grupos de tags:
-  - Rango Vocal: Bajo, Barítono, Tenor, Alto, Mezzo-Soprano, Soprano
-  - Desarrollo Vocal: Bajo, Medio, Alto
-  - Armonización: 1ra, +2da, +3ra
-  - Presencia Escénica: Bajo, Medio, Alto
+- **Armar voces**: escoger fecha y voz líder, y armar las voces (5 o 6) buscando balance de rango vocal, armonización, desarrollo vocal y presencia escénica. Los niveles se leen de **tags de persona en Planning Center Services**:
+  - Vocals - Range: Bass, Baritone, Tenor, Alto, Mezzo Soprano, Soprano
+  - Vocals - Level: In Progress, Good, Strong
+  - Vocals - Stage Presence: In Progress, Good, Strong
+  - Vocals - Harmony (selección múltiple): First, Second, Third
 
 Se actualiza sola **cada mañana** desde Planning Center (`.github/workflows/actualizar.yml`). También se puede correr a mano en **Actions → Actualizar participación → Run workflow**.
 

@@ -6,7 +6,7 @@
 2. Disponibilidad: los miembros de esos equipos (según sus posiciones en Planning Center) y sus
    blockout dates, de 4 semanas atrás a ~6 meses adelante. NO se guarda el motivo del blockout.
 3. Armar voces: los niveles de cada voz, guardados como tags de persona en Planning Center Services
-   (grupos de tags: Rango Vocal, Desarrollo Vocal, Armonización, Presencia Escénica).
+   (grupos de tags: Vocals - Range, Vocals - Level, Vocals - Harmony, Vocals - Stage Presence).
 
 Los conteos y vistas se hacen en el navegador (template.html).
 Credenciales: PCO_APP_ID y PCO_SECRET (Personal Access Token de Planning Center).
@@ -32,8 +32,9 @@ TEAM_KIND = [
 SUNDAY_HINT = re.compile(r"sunday|domin", re.I)
 LEADER_POS = re.compile(r"worship leader|l[ií]der de alabanza|lead vocal|^l[ií]der$", re.I)
 # Grupos de tags de persona en Planning Center Services (se buscan sin importar acentos ni mayúsculas)
-LEVEL_FIELDS = {"r": "rango vocal", "d": "desarrollo vocal", "a": "armonizacion", "p": "presencia escenica"}
-RANGOS = ["bajo", "baritono", "tenor", "alto", "mezzo", "soprano"]
+LEVEL_FIELDS = {"r": "vocals range", "d": "vocals level", "a": "vocals harmony", "p": "vocals stage presence"}
+# Rango: 1 Bass, 2 Baritone, 3 Tenor, 4 Alto, 5 Mezzo Soprano, 6 Soprano (mezzo se revisa antes que soprano)
+RANGOS = [(5, "mezzo"), (1, "bass"), (2, "baritone"), (3, "tenor"), (4, "alto"), (6, "soprano")]
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
 TOKEN = base64.b64encode(f"{os.environ['PCO_APP_ID']}:{os.environ['PCO_SECRET']}".encode()).decode()
@@ -188,44 +189,37 @@ def load_events():
 
 # ---------- niveles de voces (tags de persona en Planning Center Services) ----------
 def parse_level(v):
+    """In Progress = 1, Good = 2, Strong = 3."""
     n = norm(v)
-    if not n:
-        return 0
-    if re.search(r"\balt[oa]\b|\bhigh\b|\bavanzad", n):
+    if "strong" in n:
         return 3
-    if re.search(r"\bmedi[oa]\b|\bmid", n):
+    if "good" in n:
         return 2
-    if re.search(r"\bbaj[oa]\b|\blow\b|\binicial", n):
+    if "progress" in n:
         return 1
-    m = re.search(r"[123]", n)
-    return int(m.group()) if m else 0
+    return 0
 
 
-def parse_armon(v):
+def parse_harmony(v):
+    """Bits: First = 1, Second = 2, Third = 4 (el grupo es de selección múltiple)."""
     n = norm(v)
-    if "3" in n or "tercera" in n:
-        return 3
-    if "2" in n or "segunda" in n:
-        return 2
-    if "1" in n or "primera" in n or "melodia" in n:
-        return 1
-    return parse_level(v)
+    return 4 if "third" in n else 2 if "second" in n else 1 if "first" in n else 0
 
 
 def parse_rango(v):
     n = norm(v)
-    for i, r in enumerate(RANGOS):
-        if n.startswith(r) or r in n.split():
-            return i + 1
+    for k, r in RANGOS:
+        if r in n.split():
+            return k
     return 0
 
 
 def load_levels(pids):
-    """{pid: [rango, desarrollo, armonización, presencia]} (0 = sin dato) y un aviso si algo falló.
+    """{pid: [rango, level, armonía (bits), stage presence]} (0 = sin dato) y un aviso si algo falló.
 
-    Los niveles son tags de persona en Planning Center Services, en cuatro grupos de tags
-    (Rango Vocal, Desarrollo Vocal, Armonización, Presencia Escénica). Si alguien tiene dos tags
-    del mismo grupo, se usa el nivel más alto (en rango, el primero) y se avisa.
+    Los niveles son tags de persona en Planning Center Services, en cuatro grupos de tags:
+    Vocals - Range, Vocals - Level, Vocals - Harmony (selección múltiple) y Vocals - Stage Presence.
+    Si alguien tiene dos tags de Range, Level o Stage Presence, se usa el más alto (en Range, el primero) y se avisa.
     """
     grupos_vistos, out, dobles = set(), {}, []
     for pid in pids:
@@ -240,18 +234,21 @@ def load_levels(pids):
                         vals.setdefault(k, []).append(t["attributes"].get("name") or "")
         if not vals:
             continue
+
         def best(k, f):
-            xs = [f(v) for v in vals.get(k, [])]
-            xs = [x for x in xs if x]
+            xs = [x for x in (f(v) for v in vals.get(k, [])) if x]
             if len(xs) > 1:
                 dobles.append(pid)
             return (xs[0] if k == "r" else max(xs)) if xs else 0
-        out[pid] = [best("r", parse_rango), best("d", parse_level), best("a", parse_armon), best("p", parse_level)]
+        harm = 0
+        for v in vals.get("a", []):
+            harm |= parse_harmony(v)
+        out[pid] = [best("r", parse_rango), best("d", parse_level), harm, best("p", parse_level)]
     aviso = ""
     if not grupos_vistos:
-        aviso = "Nadie tiene todavía tags de niveles en Planning Center Services."
+        aviso = "Nadie tiene todavía tags de voces (Vocals - Range, Level, Harmony, Stage Presence) en Planning Center Services."
     if dobles:
-        aviso += f" {len(set(dobles))} persona(s) tienen dos tags del mismo grupo; se usó el nivel más alto."
+        aviso += f" {len(set(dobles))} persona(s) tienen dos tags en Range, Level o Stage Presence; se usó el más alto."
     return out, aviso.strip()
 
 
