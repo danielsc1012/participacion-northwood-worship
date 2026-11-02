@@ -424,6 +424,9 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
 #p-mes tr.gh th span{position:sticky;left:10px}
 #p-mes tr.vr th.nm .n{display:block;line-height:1.25}
 #p-mes tr.vr th.nm small{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--muted);font-weight:500;margin-top:2px}
+#p-mes .cd{font-variant-numeric:tabular-nums;font-weight:600;color:var(--body)}
+#p-mes small .ld{color:var(--teal-ink);font-weight:600}
+#p-mes tr.vr th.nm .n .rg{margin-left:4px;vertical-align:1px;white-space:nowrap}
 #p-mes .rg{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px}
 #p-mes .rg.g{background:var(--rg-soft);color:var(--rg)} #p-mes .rg.m{background:var(--rm-soft);color:var(--teal-ink)} #p-mes .rg.a{background:var(--ra-soft);color:var(--out-ink)} #p-mes .rg.x{background:var(--track);color:var(--muted)}
 #p-mes td.c{text-align:center;padding:3px;cursor:pointer;height:40px}
@@ -462,7 +465,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
 #p-mes .note{font-size:12.5px;color:var(--muted);margin-top:14px;max-width:84ch}
 #p-mes .mc{display:none}
 @media (max-width:620px){#p-mes th.nm{min-width:128px;max-width:128px;padding:6px 8px}#p-mes thead th.sd{min-width:50px;padding:6px 2px}#p-mes thead th.sd b{font-size:15px}#p-mes .mnav h2{font-size:20px;min-width:150px}
-  #p-mes .ha{display:none}#p-mes .ct,#p-mes td.tot,#p-mes tfoot tr>td:last-child{display:none}
+  #p-mes tr.vr th.nm small{gap:5px;flex-wrap:wrap}#p-mes .ct,#p-mes td.tot,#p-mes tfoot tr>td:last-child{display:none}
   #p-mes tr.vr th.nm .n{display:flex;justify-content:space-between;gap:6px;align-items:center}
   #p-mes .mc{display:inline-grid;place-items:center;min-width:22px;height:20px;border-radius:999px;font-family:var(--display);font-size:13px;color:var(--muted);flex:none}
   #p-mes tr.k2 .mc{background:var(--teal);color:var(--on-teal)}#p-mes tr.k3 .mc{background:var(--out);color:var(--on-out)}#p-mes tr.k4 .mc{background:var(--red);color:#fff}
@@ -646,6 +649,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
     <div class="legend mleg">
       <span><i class="lg-c0"></i>0–1 veces</span><span><i class="lg-c2"></i>2 · la meta</span><span><i class="lg-c3"></i>3</span><span><i class="lg-c4"></i>4 o más</span>
       <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
+      <span><b class="lgk">H</b>Harmony (1ra-2da-3ra) · <b class="lgk">P</b>Stage Presence · <b class="lgk">L</b>Level (1 In Progress, 2 Good, 3 Strong)</span>
     </div>
     <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en Armar voces. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
@@ -1392,6 +1396,7 @@ function quick(ids,L){
   o.l=lv(B.dv);o.s=lv(B.pr);
   return o;
 }
+const codes=v=>{const h=arm(v)?'H.'+[1,2,3].filter(k=>arm(v)&(1<<(k-1))).join('-'):'H.—';return `<span class="cd">${h}</span><span class="cd">P.${pres(v)||'—'}</span><span class="cd">L.${dev(v)||'—'}</span>`;};
 function renderMonth(){
   if(mon<MINM)mon=MINM; if(mon>MAXM)mon=MAXM;
   const ss=sundays(mon), cnt=monthCounts(ss);
@@ -1417,7 +1422,7 @@ function renderMonth(){
     h+=`<tr class="gh"><th colspan="${ss.length+2}"><span>${RANGO[r]}</span></th></tr>`;
     g.forEach(v=>{
       const n=cnt.get(v.i)||0;
-      h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)}</span><b class="mc">${n}</b></span><small><span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span><span class="ha">${v.lv?`Arm. ${armShort(arm(v))}`:'sin tags'}${v.lead?' · dirige':''}</span></small></th>`;
+      h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)} <span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span></span><b class="mc">${n}</b></span><small title="Harmony: ${armLong(arm(v))} · Stage Presence: ${LVL[pres(v)]} · Level: ${LVL[dev(v)]}">${codes(v)}${v.lead?'<span class="ld">dirige</span>':''}</small></th>`;
       ss.forEach(d=>{
         const t=T[d],isL=t.l===v.i,isM=t.m.includes(v.i),o=outOn(v,d),bk=o&&!o.part&&!isL&&!isM;
         const c=['c'];if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
