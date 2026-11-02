@@ -29,6 +29,7 @@ TEAM_KIND = [
     ("B", re.compile(r"^(band|banda|musicians|músicos)$", re.I)),
     ("S", re.compile(r"^(sound|sonido|audio)$", re.I)),
 ]
+RISK_EXCLUDE = {"leaders", "pastor"}
 SUNDAY_HINT = re.compile(r"sunday|domin", re.I)
 LEADER_POS = re.compile(r"worship leader|l[ií]der de alabanza|lead vocal|^l[ií]der$", re.I)
 # Grupos de tags de persona en Planning Center Services (se buscan sin importar acentos ni mayúsculas)
@@ -288,10 +289,11 @@ def main():
     print(f"Tipos de servicio: {st_names} · domingos: {[st_names[i] for i in sunday]}")
 
     # ---- equipos que cuentan ----
-    team_kind = {}
+    team_kind, team_name = {}, {}
     for page in paginate("/teams?per_page=100"):
         for t in page["data"]:
             name = (t["attributes"].get("name") or "").strip()
+            team_name[t["id"]] = name or "Equipo"
             for kind, rx in TEAM_KIND:
                 if rx.match(name):
                     team_kind[t["id"]] = kind
@@ -316,6 +318,7 @@ def main():
 
     # ---- planes (pasados = participación; próximas semanas = ya programados) ----
     plans, assigns = [], []
+    others = []  # programaciones en otros ministerios (para el riesgo); se filtran a los miembros al final
     for si, sid in enumerate(st_ids):
         url = f"/service_types/{sid}/plans?filter=after&after={start.isoformat()}&order=sort_date&per_page=100"
         n0 = len(plans)
@@ -337,13 +340,23 @@ def main():
                 for mp in paginate(f"/service_types/{sid}/plans/{p['id']}/team_members?per_page=100"):
                     for m in mp["data"]:
                         a = m["attributes"]
-                        kind = team_kind.get(rel_id(m, "team"))
+                        tid = rel_id(m, "team")
+                        kind = team_kind.get(tid)
                         pid = rel_id(m, "person")
-                        if not kind or not pid or not a.get("name"):
+                        if not pid or not a.get("name"):
                             continue
                         st = (a.get("status") or "U")[:1].upper()
                         if st not in "CUD":
                             st = "U"
+                        if not kind:
+                            # mismas reglas que el Portal de Voluntarios: "Pastor"/"Leaders" son placeholders;
+                            # en el equipo Leaders solo cuenta Preacher (que no cuenta para el límite de equipos)
+                            posl = (a.get("team_position_name") or "").strip().lower()
+                            tname = team_name.get(tid, "Equipo")
+                            if posl in RISK_EXCLUDE or (tname.strip().lower() == "leaders" and posl != "preacher"):
+                                continue
+                            others.append([pid, pi_plan, "Preacher" if posl == "preacher" else tname, st])
+                            continue
                         pos = (a.get("team_position_name") or "Sin posición").strip()
                         assigns.append([person_idx(pid, a["name"]), pi_plan, pos_idx(kind, pos), st])
             if done:
@@ -411,10 +424,26 @@ def main():
             r["lv"] = lv
     print(f"Niveles: {sum(1 for r in roster if r.get('lv'))}/{len(vocal_pids)} voces con datos" + (f" · aviso: {lv_warn}" if lv_warn else ""))
 
+    # ---- otros ministerios de los miembros (para la pestaña Riesgo) ----
+    ot_names, ot_idx, ro, seen = [], {}, [], set()
+    for pid, pl, tname, st in others:
+        if pid not in member:
+            continue
+        if tname not in ot_idx:
+            ot_idx[tname] = len(ot_names)
+            ot_names.append(tname)
+        key = (pid, pl, tname)
+        if key in seen:
+            continue
+        seen.add(key)
+        ro.append([person_index[pid], pl, ot_idx[tname], st])
+    print(f"Otros ministerios de los miembros: {len(ro)} programaciones en {len(ot_names)} equipos")
+
     data = {"gen": today.isoformat(), "start": start.isoformat(), "st": st_names, "sunday": sunday,
             "plans": plans, "people": people, "pid": pids, "pos": positions, "a": assigns,
             "roster": roster, "dstart": d_start.isoformat(), "dend": d_end.isoformat(),
-            "ev": events, "evUpd": ev_upd, "evUrl": EVENTOS_URL, "lvWarn": lv_warn}
+            "ev": events, "evUpd": ev_upd, "evUrl": EVENTOS_URL, "lvWarn": lv_warn,
+            "ro": ro, "otn": ot_names, "nolimit": ["preacher"]}
     updated = f"{today.day} de {MESES[today.month - 1]} de {today.year}"
     with open(os.path.join(HERE, "template.html"), encoding="utf-8") as f:
         tpl = f.read()

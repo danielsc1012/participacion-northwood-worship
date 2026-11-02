@@ -470,6 +470,92 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
   #p-mes .mc{display:inline-grid;place-items:center;min-width:22px;height:20px;border-radius:999px;font-family:var(--display);font-size:13px;color:var(--muted);flex:none}
   #p-mes tr.k2 .mc{background:var(--teal);color:var(--on-teal)}#p-mes tr.k3 .mc{background:var(--out);color:var(--on-out)}#p-mes tr.k4 .mc{background:var(--red);color:#fff}
   #p-mes td.c span{height:30px}#p-mes .bl i{font-size:10px;padding:1px 4px}}
+
+/* ===== Riesgo ===== */
+#p-riesgo{--hi:#c62828;--hi-soft:#fbe3e3;--hi-ink:#a31515;--md:#e0a100;--md-soft:#fff3d1;--md-ink:#7a5600;--in:#8a8f8f;--in-soft:#ecefef}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #p-riesgo{--hi:#ff6b6b;--hi-soft:#3d1717;--hi-ink:#ff9a9a;--md:#f0b92e;--md-soft:#3a2f10;--md-ink:#f5cd6a;--in:#7d8282;--in-soft:#262929}}
+:root[data-theme="dark"] #p-riesgo{--hi:#ff6b6b;--hi-soft:#3d1717;--hi-ink:#ff9a9a;--md:#f0b92e;--md-soft:#3a2f10;--md-ink:#f5cd6a;--in:#7d8282;--in-soft:#262929}
+#p-riesgo .rkpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:640px){#p-riesgo .rkpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#p-riesgo .rk{font:inherit;text-align:left;background:var(--surface);border:1px solid var(--line);border-left-width:5px;border-radius:8px;padding:10px 14px;cursor:pointer;color:var(--fg)}
+#p-riesgo .rk b{display:block;font-family:var(--display);font-size:30px;line-height:1.05}
+#p-riesgo .rk span{font-size:12.5px;color:var(--body)}
+#p-riesgo .rk.hi{border-left-color:var(--hi)}#p-riesgo .rk.hi b{color:var(--hi-ink)}
+#p-riesgo .rk.md{border-left-color:var(--md)}#p-riesgo .rk.md b{color:var(--md-ink)}
+#p-riesgo .rk.ok{border-left-color:var(--teal)}#p-riesgo .rk.ok b{color:var(--teal-ink)}
+#p-riesgo .rk.in{border-left-color:var(--in)}#p-riesgo .rk.in b{color:var(--muted)}
+#p-riesgo .rk.on{box-shadow:inset 0 0 0 2px var(--fg)}
+#p-riesgo .rctl{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+#p-riesgo .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+#p-riesgo .seg button{font:inherit;font-size:13px;font-weight:500;padding:7px 12px;border:0;background:none;color:var(--fg);cursor:pointer;border-right:1px solid var(--line)}
+#p-riesgo .seg button:last-child{border-right:0}
+#p-riesgo .seg button[aria-pressed="true"]{background:var(--teal);color:var(--on-teal);font-weight:600}
+#p-riesgo .rsl{font-size:12px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:center;text-transform:uppercase;letter-spacing:.06em}
+#p-riesgo select{font:inherit;font-size:13.5px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);text-transform:none;letter-spacing:0}
+#p-riesgo .rfil{font-size:13px;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+#p-riesgo .lnk{font:inherit;font-size:13px;border:0;background:none;color:var(--teal-ink);text-decoration:underline;cursor:pointer}
+#p-riesgo .rb{display:inline-flex;gap:5px;align-items:center;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+#p-riesgo .rb.hi,#p-mes .rb.hi{background:var(--hi-soft,#fbe3e3);color:var(--hi-ink,#a31515)}
+#p-riesgo .rb.md{background:var(--md-soft);color:var(--md-ink)}
+#p-riesgo .rb.ok{background:var(--teal-soft);color:var(--teal-ink)}
+#p-riesgo .rb.in{background:var(--in-soft);color:var(--muted)}
+#p-riesgo .rhead,#p-riesgo .rr summary{display:grid;grid-template-columns:minmax(180px,1.4fr) 112px minmax(120px,1fr) 70px minmax(200px,1.8fr) 80px;gap:12px;align-items:center}
+#p-riesgo .rhead{font-size:11.5px;color:var(--muted);font-weight:600;padding:0 14px 6px}
+#p-riesgo .rr{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:6px}
+#p-riesgo .rr summary{list-style:none;cursor:pointer;padding:10px 14px}
+#p-riesgo .rr summary::-webkit-details-marker{display:none}
+#p-riesgo .rr[open]{border-color:var(--teal)}
+#p-riesgo .nm{font-weight:600;font-size:14px;line-height:1.3}
+#p-riesgo .nm small{display:block;font-weight:500;font-size:11.5px;color:var(--muted)}
+#p-riesgo .wb{display:flex;gap:8px;align-items:center}
+#p-riesgo .wb .tr{position:relative;flex:1;height:10px;background:var(--track);border-radius:5px}
+#p-riesgo .wb .fl{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--teal)}
+#p-riesgo .wb .fl.md{background:var(--md)}#p-riesgo .wb .fl.hi{background:var(--hi)}#p-riesgo .wb .fl.in{background:var(--in)}
+#p-riesgo .wb .mk{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--fg);opacity:.5}
+#p-riesgo .wb b{font-family:var(--display);font-size:15px;min-width:22px;text-align:right}
+#p-riesgo .num{font-family:var(--display);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+#p-riesgo .num small{display:block;font-family:var(--body-font);font-weight:500;font-size:11px;color:var(--muted)}
+#p-riesgo .num.warn{color:var(--hi-ink)}
+#p-riesgo .lab{display:none}
+#p-riesgo .tcs{display:flex;flex-wrap:wrap;gap:4px}
+#p-riesgo .tc{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--track);color:var(--body);white-space:nowrap}
+#p-riesgo .tc.w{background:var(--teal-soft);color:var(--teal-ink)}
+#p-riesgo .tc.over{box-shadow:inset 0 0 0 1.5px var(--hi)}
+#p-riesgo .tc b{font-weight:700}
+#p-riesgo .dim{color:var(--muted)}
+@media (max-width:760px){
+  #p-riesgo .rhead{display:none}
+  #p-riesgo .rr summary{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}
+  #p-riesgo .rr summary>.wb,#p-riesgo .rr summary>.tcs{grid-column:1/-1}
+  #p-riesgo .lab{display:inline;font-family:var(--body-font);font-weight:500;font-size:11.5px;color:var(--muted)}
+}
+#p-riesgo .rdet{border-top:1px solid var(--line);padding:12px 14px 14px}
+#p-riesgo .rex{margin:0 0 12px;padding:10px 12px;border-radius:8px;font-size:13.5px;background:var(--bg)}
+#p-riesgo .rex.hi{background:var(--hi-soft)}#p-riesgo .rex.md{background:var(--md-soft)}#p-riesgo .rex.ok{background:var(--teal-soft)}
+#p-riesgo h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+#p-riesgo .strip{display:grid;grid-template-columns:repeat(58,minmax(0,1fr));gap:2px}
+#p-riesgo .strip i{height:22px;border-radius:2px;background:var(--track)}
+#p-riesgo .strip i.l1,#p-riesgo .rleg i.l1{background:var(--teal)}
+#p-riesgo .strip i.l2,#p-riesgo .rleg i.l2{background:var(--md)}
+#p-riesgo .strip i.l3,#p-riesgo .rleg i.l3{background:var(--hi)}
+#p-riesgo .strip i.dec,#p-riesgo .rleg i.dec{box-shadow:inset 0 0 0 1.5px var(--hi)}
+#p-riesgo .strip i.fut,#p-riesgo .rleg i.fut{opacity:.5}
+#p-riesgo .strip i.sep{margin-left:4px}
+#p-riesgo .sx{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}
+#p-riesgo .rleg{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:6px}
+#p-riesgo .rleg i{display:inline-block;width:12px;height:12px;border-radius:2px;background:var(--track);vertical-align:-2px;margin-right:4px}
+#p-riesgo .rcols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+@media (max-width:640px){#p-riesgo .rcols{grid-template-columns:1fr}}
+#p-riesgo dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:13px;margin:10px 0 0}
+#p-riesgo dt{color:var(--muted)}#p-riesgo dd{margin:0;font-weight:500}
+#p-riesgo .tl{list-style:none;margin:0;padding:0;font-size:13px}
+#p-riesgo .tl li{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line)}
+#p-riesgo .tl li span:last-child{color:var(--muted);white-space:nowrap}
+#p-riesgo .dec-t{color:var(--hi-ink)}
+#p-riesgo .note{font-size:12.5px;color:var(--muted);margin-top:14px;max-width:90ch}
+#p-mes .rk-hi{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:#fbe3e3;color:#a31515;margin-left:4px;vertical-align:1px;white-space:nowrap}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #p-mes .rk-hi{background:#3d1717;color:#ff9a9a}}
+:root[data-theme="dark"] #p-mes .rk-hi{background:#3d1717;color:#ff9a9a}
 </style>
 </head>
 <body>
@@ -487,6 +573,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
     <button role="tab" data-p="disp">Disponibilidad</button>
     <button role="tab" data-p="arm">Armar voces</button>
     <button role="tab" data-p="mes">Plan del mes</button>
+    <button role="tab" data-p="riesgo">Riesgo</button>
   </nav>
 
   <!-- ===== Participación ===== -->
@@ -654,6 +741,17 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
     <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en Armar voces. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
 
+  <!-- ===== Riesgo ===== -->
+  <div id="p-riesgo" hidden>
+    <div class="rkpis" id="rkpis"></div>
+    <div class="rctl">
+      <div class="seg" id="rteam" role="group" aria-label="Equipo"><button data-v="ALL">Todos</button><button data-v="V">Voces</button><button data-v="B">Banda</button><button data-v="S">Sonido</button></div>
+      <label class="rsl">Ordenar <select id="rsort"><option value="risk">Por riesgo</option><option value="weeks">Semanas servidas</option><option value="next">Próximas 4 semanas</option><option value="name">Nombre</option></select></label>
+    </div>
+    <div id="rlist"></div>
+    <p class="note"><b>Niveles:</b> Alto = 39+ semanas de 52 (75%), racha de 8+ semanas seguidas, 9+ semanas cargadas de las últimas 13 (2 o más días en la semana) o más de 2 equipos. Medio = 32–38 semanas, racha de 5–7 o 6–8 semanas cargadas. Baja actividad = 10 semanas o menos de 52, o 2 o menos de las últimas 13. Sano = el resto. Cuenta todo lo que la persona sirve en la iglesia; un servicio = un equipo en un día. Voces, banda y sonido cuentan cada uno como un equipo (domingo, miércoles y jóvenes juntos). Preacher cuenta como servicio pero no para el límite de equipos. Solo cuentan las programaciones confirmadas o sin responder.</p>
+  </div>
+
   <footer>Fuente: Planning Center Services. Última actualización: __UPDATED__ · se actualiza cada mañana. Página privada del liderazgo del equipo de alabanza de Iglesia Northwood.</footer>
 </div>
 <div class="tip" id="dtip" role="tooltip"></div>
@@ -664,9 +762,10 @@ const SUBS={
   part:"Cuántas veces ha servido cada persona en voces, banda y sonido.",
   disp:"Quién del equipo de alabanza no está disponible y cuándo, según los blockout dates de Planning Center.",
   arm:"Escoge la fecha, la voz líder y arma las voces buscando balance de rango, armonización, desarrollo vocal y presencia escénica.",
-  mes:"Arma las voces de todos los domingos del mes. La meta es que cada voz sirva 2 veces."
+  mes:"Arma las voces de todos los domingos del mes. La meta es que cada voz sirva 2 veces.",
+  riesgo:"Riesgo de agotamiento de voces, banda y sonido, contando todo lo que sirven en la iglesia (no solo alabanza). Mismos criterios que el Portal de Voluntarios."
 };
-const TITLES={part:"Participación",disp:"Disponibilidad",arm:"Armar voces",mes:"Plan del mes"};
+const TITLES={part:"Participación",disp:"Disponibilidad",arm:"Armar voces",mes:"Plan del mes",riesgo:"Riesgo"};
 if(DATA.demo)document.getElementById('demob').hidden=false;
 
 /* ================= Participación ================= */
@@ -1108,6 +1207,160 @@ evNote();loadLiveEvents();
 return {show:()=>{renderKpis();setTab(tab,true);}};
 })();
 
+/* ================= Riesgo (mismos criterios que el Portal de Voluntarios) ================= */
+const Risk=(function(){
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const T={hiW:39,mdW:32,hiS:8,mdS:5,maxT:2,inW:10,inR:2,hiH:9,mdH:6};
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const KN={V:'Voces',B:'Banda',S:'Sonido'};
+const D0=s=>new Date(s+'T12:00:00');
+const gen=D0(DATA.gen);
+const week0=new Date(gen.getTime()-gen.getDay()*864e5);
+const start=new Date(week0.getTime()-51*7*864e5);
+const CUR=51, AHEAD=6, NW=52+AHEAD;
+const offOf=s=>Math.round((D0(s)-start)/864e5);
+const todayOff=Math.round((gen-start)/864e5);
+const dayDate=off=>new Date(start.getTime()+off*864e5);
+const fmt=(d,y)=>`${d.getDate()} ${MES[d.getMonth()]}${y?' '+d.getFullYear():''}`;
+const NOLIM=new Set((DATA.nolimit||[]).map(norm));
+const WORSHIP=new Set(Object.values(KN).map(norm));
+const sem=n=>`${n} ${n===1?'semana':'semanas'}`;
+const yList=a=>a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];
+const pc=n=>Math.round(n/52*100)+'%';
+
+// programaciones de cada miembro: alabanza (D.a) + otros ministerios (D.ro)
+const mem=new Map(DATA.roster.map(r=>[r.i,r]));
+const raw=new Map(); const push=(pi,pl,team,st)=>{if(!mem.has(pi))return;(raw.get(pi)||raw.set(pi,[]).get(pi)).push({pl,team,st});};
+DATA.a.forEach(([pi,pl,po,st])=>push(pi,pl,KN[DATA.pos[po][0]],st));
+(DATA.ro||[]).forEach(([pi,pl,ti,st])=>push(pi,pl,DATA.otn[ti],st));
+
+const P=[];
+DATA.roster.forEach(r=>{
+  const wk=Array.from({length:NW},()=>({days:new Set(),dec:0}));
+  const p={i:r.i,name:DATA.people[r.i],k:r.k,wk,mins:{},minName:{},svc:new Set(),wsvc:0,osvc:0,dec90:0,items:[],next4:0};
+  const minDays={};const n4=new Set();
+  (raw.get(r.i)||[]).forEach(x=>{
+    const [d,si]=DATA.plans[x.pl];const off=offOf(d);const w=Math.floor(off/7);if(w<0||w>=NW)return;
+    const mk=norm(x.team);p.minName[mk]=x.team;
+    const it={off,team:x.team,st:DATA.st[si]||'',dec:x.st==='D',w:WORSHIP.has(mk)};p.items.push(it);
+    if(x.st==='D'){wk[w].dec++;if(off<=todayOff&&off>todayOff-90)p.dec90++;return;}
+    wk[w].days.add(off);const sk=off+'|'+mk;
+    if(w<=CUR){if(!p.svc.has(sk)){p.svc.add(sk);if(it.w)p.wsvc++;else p.osvc++;}(minDays[mk]||(minDays[mk]=new Set())).add(off);}
+    else if(off>todayOff&&off<=todayOff+28)n4.add(sk);
+  });
+  Object.entries(minDays).forEach(([k,s])=>p.mins[k]=s.size);
+  p.next4=n4.size;
+  const served=wk.map(c=>c.days.size>0);
+  const weeks=served.slice(0,CUR+1).filter(Boolean).length;
+  let streak=0,w=CUR;while(w>=0&&served[w]){streak++;w--;}
+  let ahead=0;w=CUR+1;while(w<NW&&served[w]){ahead++;w++;}if(!streak)ahead=0;
+  let lastRest=-1;for(let k=CUR;k>=0;k--)if(!served[k]){lastRest=k;break;}
+  const r13=served.slice(CUR-12,CUR+1).filter(Boolean).length;
+  const heavy=wk.slice(CUR-12,CUR+1).filter(c=>c.days.size>=2).length;
+  const nMin=Object.keys(p.mins).filter(k=>!NOLIM.has(k)).length;
+  const sTot=streak+ahead;let lvl='ok';const why=[];
+  if(weeks>=T.hiW){lvl='hi';why.push(`${weeks} de 52 semanas`);}
+  if(sTot>=T.hiS){lvl='hi';why.push(`racha de ${streak}${ahead?` (+${ahead} prog.)`:''}`);}
+  if(nMin>T.maxT){lvl='hi';why.push(`${nMin} equipos`);}
+  if(heavy>=T.hiH){lvl='hi';why.push(`${heavy} de 13 semanas cargadas`);}
+  if(lvl!=='hi'){
+    if(weeks>=T.mdW){lvl='md';why.push(`${weeks} de 52 semanas`);}
+    if(sTot>=T.mdS){lvl='md';why.push(`racha de ${streak}${ahead?` (+${ahead} prog.)`:''}`);}
+    if(heavy>=T.mdH){lvl='md';why.push(`${heavy} de 13 semanas cargadas`);}
+    const lowY=weeks<=T.inW,lowR=r13<=T.inR;
+    if((lowY||lowR)&&heavy<T.mdH){if(lvl==='md')why.length=0;lvl='in';if(lowY)why.push(`solo ${weeks} de 52 semanas`);if(lowR)why.push(`solo ${r13} de las últimas 13`);}
+  }
+  if(p.dec90>=3)why.push(`declinó ${p.dec90} veces en 90 días`);
+  Object.assign(p,{weeks,streak,ahead,sTot,lastRest,r13,heavy,nMin,lvl,why,
+    rank:(lvl==='hi'?3e6:lvl==='md'?2e6:lvl==='ok'?1e6:0)+weeks*1000+heavy*100+sTot*10+nMin});
+  P.push(p);
+});
+function explain(p){
+  const racha=`lleva ${sem(p.streak)} seguidas sin descanso${p.ahead?` y ya tiene ${p.ahead} más programadas`:''}`;let s;const r=[];
+  if(p.lvl==='hi'){
+    if(p.weeks>=T.hiW)r.push(`sirvió ${p.weeks} de las últimas 52 semanas (${pc(p.weeks)}; riesgo alto desde ${T.hiW}, ${pc(T.hiW)})`);
+    if(p.sTot>=T.hiS)r.push(`${racha} (riesgo alto desde ${T.hiS})`);
+    if(p.nMin>T.maxT)r.push(`sirve en ${p.nMin} equipos (la meta es máximo ${T.maxT})`);
+    if(p.heavy>=T.hiH)r.push(`sirvió 2 o más días en ${p.heavy} de las últimas 13 semanas (riesgo alto desde ${T.hiH})`);
+    s=`Riesgo alto porque ${yList(r)}.`;
+  }else if(p.lvl==='md'){
+    if(p.weeks>=T.mdW)r.push(`sirvió ${p.weeks} de las últimas 52 semanas (${pc(p.weeks)}; riesgo medio desde ${T.mdW})`);
+    if(p.sTot>=T.mdS)r.push(`${racha} (riesgo medio desde ${T.mdS})`);
+    if(p.heavy>=T.mdH)r.push(`sirvió 2 o más días en ${p.heavy} de las últimas 13 semanas (riesgo medio desde ${T.mdH})`);
+    s=`Riesgo medio porque ${yList(r)}.`;
+  }else if(p.lvl==='in'){
+    if(p.weeks<=T.inW)r.push(`solo sirvió ${p.weeks} de las últimas 52 semanas`);
+    if(p.r13<=T.inR)r.push(`en las últimas 13 semanas solo sirvió ${p.r13}`);
+    s=`Baja actividad porque ${yList(r)}. No significa que dejó de servir; vale la pena buscar a esta persona y animarla.`;
+  }else s=`Sano: sirvió ${p.weeks} de las últimas 52 semanas, su racha actual es de ${sem(p.streak)}, está en ${p.nMin} ${p.nMin===1?'equipo':'equipos'} y tuvo ${p.heavy} ${p.heavy===1?'semana cargada':'semanas cargadas'} de 13.`;
+  if(p.osvc)s+=` De sus ${p.svc.size} servicios del año, ${p.osvc} fueron fuera de alabanza.`;
+  if(p.dec90>=3)s+=` Además declinó ${p.dec90} veces en los últimos 90 días, que puede ser señal de cansancio.`;
+  return s;
+}
+P.forEach(p=>p.text=explain(p));
+const BY=new Map(P.map(p=>[p.i,p]));
+const LV={hi:['▲','Alto'],md:['●','Medio'],ok:['✓','Sano'],in:['○','Baja actividad']};
+const badge=(l,tip)=>`<span class="rb ${l}"${tip?` title="${esc(tip)}"`:''}><span aria-hidden="true">${LV[l][0]}</span>${LV[l][1]}</span>`;
+const st=Object.assign({team:'ALL',lvl:'',sort:'risk'},(()=>{try{return JSON.parse(localStorage.getItem('nwr')||'{}')}catch(e){return {}}})());
+const save=()=>{try{localStorage.setItem('nwr',JSON.stringify(st))}catch(e){}};
+const open=new Set();
+const $=s=>document.querySelector('#p-riesgo '+s);
+function rows(){
+  let r=P.filter(p=>(st.team==='ALL'||p.k.includes(st.team))&&(!st.lvl||p.lvl===st.lvl));
+  const by={risk:(a,b)=>b.rank-a.rank,weeks:(a,b)=>b.weeks-a.weeks,next:(a,b)=>b.next4-a.next4||b.rank-a.rank,name:(a,b)=>a.name.localeCompare(b.name,'es')}[st.sort];
+  return r.sort(by);
+}
+function chips(p){
+  const ks=Object.keys(p.mins).sort((a,b)=>WORSHIP.has(b)-WORSHIP.has(a)||p.mins[b]-p.mins[a]);const over=p.nMin>T.maxT;
+  return ks.map(k=>`<span class="tc${WORSHIP.has(k)?' w':''}${over&&!NOLIM.has(k)?' over':''}" title="${p.mins[k]} ${p.mins[k]===1?'servicio':'servicios'} en el año">${esc(p.minName[k])} <b>${p.mins[k]}</b></span>`).join('')||'<span class="dim">—</span>';
+}
+function detail(p){
+  let cells='';
+  for(let w=0;w<NW;w++){const c=p.wk[w],n=c.days.size,l=n>=3?3:n;const cl=['wk'];if(l)cl.push('l'+l);if(c.dec&&!n)cl.push('dec');if(w>CUR)cl.push('fut');if(w===CUR+1)cl.push('sep');
+    cells+=`<i class="${cl.join(' ')}" title="Semana del ${fmt(dayDate(w*7),true)}: ${n?n+(n===1?' día':' días'):'no sirvió'}${c.dec?` · declinó ${c.dec}`:''}"></i>`;}
+  const rest=p.lastRest<0?'No ha descansado ninguna semana en el año':p.lastRest===CUR?'Esta semana':`Semana del ${fmt(dayDate(p.lastRest*7),true)} (hace ${CUR-p.lastRest} sem.)`;
+  const next=p.items.filter(it=>it.off>todayOff).sort((a,b)=>a.off-b.off).slice(0,8).map(it=>`<li><span class="${it.dec?'dec-t':''}">${esc(it.team)}${it.dec?' · declinó':''}</span><span>${fmt(dayDate(it.off))} · ${esc(it.st)}</span></li>`).join('');
+  return `<div class="rdet"><p class="rex ${p.lvl}">${esc(p.text)}</p>
+    <h4>Sus 52 semanas y las próximas ${AHEAD}</h4><div class="strip">${cells}</div>
+    <div class="sx"><span>${fmt(start,true)}</span><span>hoy</span><span>+${AHEAD} sem.</span></div>
+    <div class="rleg"><span><i></i>No sirvió</span><span><i class="l1"></i>1 día</span><span><i class="l2"></i>2 días</span><span><i class="l3"></i>3+ días</span><span><i class="dec"></i>Declinó</span><span><i class="l1 fut"></i>Programado</span></div>
+    <div class="rcols"><dl>
+      <dt>Semanas servidas</dt><dd>${p.weeks} de 52 (${pc(p.weeks)})</dd>
+      <dt>Servicios en el año</dt><dd>${p.svc.size}: ${p.wsvc} en alabanza · ${p.osvc} en otros ministerios</dd>
+      <dt>Semanas cargadas</dt><dd>${p.heavy} de las últimas 13 (2+ días)</dd>
+      <dt>Racha actual</dt><dd>${p.streak} sem.${p.ahead?` + ${p.ahead} programadas`:''}</dd>
+      <dt>Último descanso</dt><dd>${rest}</dd>
+      <dt>Declinó (90 días)</dt><dd>${p.dec90}</dd></dl>
+      <div><h4>Próximas programaciones</h4><ul class="tl">${next||'<li><span>Nada programado</span><span></span></li>'}</ul></div></div></div>`;
+}
+function render(){
+  const all=P.filter(p=>st.team==='ALL'||p.k.includes(st.team));
+  const c={hi:0,md:0,ok:0,in:0};all.forEach(p=>c[p.lvl]++);
+  $('#rkpis').innerHTML=['hi','md','ok','in'].map(l=>`<button class="rk ${l}${st.lvl===l?' on':''}" data-l="${l}"><b>${c[l]}</b><span>${LV[l][1]==='Alto'?'Riesgo alto':LV[l][1]==='Medio'?'Riesgo medio':LV[l][1]}</span></button>`).join('');
+  document.querySelectorAll('#rteam button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===st.team)));
+  $('#rsort').value=st.sort;
+  const r=rows();
+  $('#rlist').innerHTML=(st.lvl?`<div class="rfil">Mostrando solo: ${badge(st.lvl)} <button class="lnk" id="rclr">Ver todos</button></div>`:'')+
+    `<div class="rhead"><span>Persona</span><span>Nivel</span><span>Semanas (52)</span><span>Racha</span><span>Equipos y servicios en el año</span><span>Próx. 4 sem.</span></div>`+
+    (r.length?r.map(p=>`<details class="rr" data-i="${p.i}"${open.has(p.i)?' open':''}><summary>
+      <span class="nm" title="${esc(p.text)}">${esc(p.name)}<small>${[...p.k].map(k=>KN[k]).join(' · ')}${p.why.length?' — '+esc(p.why.join(' · ')):''}</small></span>
+      <span>${badge(p.lvl,p.text)}</span>
+      <span class="wb"><span class="tr"><span class="fl ${p.weeks>=T.hiW?'hi':p.weeks>=T.mdW?'md':p.weeks<=T.inW?'in':''}" style="width:${p.weeks/52*100}%"></span><span class="mk" style="left:${T.hiW/52*100}%"></span></span><b>${p.weeks}</b></span>
+      <span class="num"><span class="lab">Racha </span>${p.streak}${p.ahead?`<small>+${p.ahead} prog.</small>`:''}</span>
+      <span class="tcs">${chips(p)}</span>
+      <span class="num${p.next4>=4?' warn':''}"><span class="lab">Próx. 4 sem. </span>${p.next4||'—'}</span>
+    </summary>${open.has(p.i)?detail(p):''}</details>`).join(''):'<div class="dim" style="padding:20px">Nadie con estos filtros.</div>');
+}
+$('#rkpis').addEventListener('click',e=>{const b=e.target.closest('.rk');if(!b)return;st.lvl=st.lvl===b.dataset.l?'':b.dataset.l;save();render();});
+document.getElementById('rteam').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;st.team=b.dataset.v;save();render();});
+$('#rsort').addEventListener('change',e=>{st.sort=e.target.value;save();render();});
+$('#rlist').addEventListener('click',e=>{if(e.target.closest('#rclr')){st.lvl='';save();render();}});
+$('#rlist').addEventListener('toggle',e=>{const d=e.target.closest('details.rr');if(!d)return;const i=+d.dataset.i;
+  if(d.open){if(!open.has(i)){open.add(i);d.insertAdjacentHTML('beforeend',detail(BY.get(i)));}}else{open.delete(i);const x=d.querySelector('.rdet');if(x)x.remove();}},true);
+return {show:render,get:i=>BY.get(i),badge};
+})();
+
 /* ================= Armar voces ================= */
 const Arm=(function(){
 const $=s=>document.querySelector(s);
@@ -1422,7 +1675,7 @@ function renderMonth(){
     h+=`<tr class="gh"><th colspan="${ss.length+2}"><span>${RANGO[r]}</span></th></tr>`;
     g.forEach(v=>{
       const n=cnt.get(v.i)||0;
-      h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)} <span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span></span><b class="mc">${n}</b></span><small title="Harmony: ${armLong(arm(v))} · Stage Presence: ${LVL[pres(v)]} · Level: ${LVL[dev(v)]}">${codes(v)}${v.lead?'<span class="ld">dirige</span>':''}</small></th>`;
+      h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)} <span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span>${(()=>{const r=Risk.get(v.i);return r&&r.lvl==='hi'?`<span class="rk-hi" title="${esc(r.text)}">▲ Riesgo alto</span>`:'';})()}</span><b class="mc">${n}</b></span><small title="Harmony: ${armLong(arm(v))} · Stage Presence: ${LVL[pres(v)]} · Level: ${LVL[dev(v)]}">${codes(v)}${v.lead?'<span class="ld">dirige</span>':''}</small></th>`;
       ss.forEach(d=>{
         const t=T[d],isL=t.l===v.i,isM=t.m.includes(v.i),o=outOn(v,d),bk=o&&!o.part&&!isL&&!isM;
         const c=['c'];if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
@@ -1532,7 +1785,7 @@ return {show:()=>{loadDraft();render();},showMonth:renderMonth,goDate:d=>{date=d
 
 /* ================= pestañas principales ================= */
 (function(){
-  const VIEWS={part:Part,disp:Disp,arm:Arm,mes:{show:()=>Arm.showMonth()}}, shown={};
+  const VIEWS={part:Part,disp:Disp,arm:Arm,mes:{show:()=>Arm.showMonth()},riesgo:Risk}, shown={};
   const get=()=>{try{return localStorage.getItem('nw.tab')}catch(e){return null}};
   const set=v=>{try{localStorage.setItem('nw.tab',v)}catch(e){}};
   function go(p,push){
