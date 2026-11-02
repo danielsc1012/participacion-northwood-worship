@@ -1,19 +1,28 @@
-"""Genera index.html de Participación (voces, banda y sonido) de Northwood a partir de Planning Center.
+"""Genera index.html del equipo de alabanza de Northwood (Participación · Disponibilidad · Armar voces).
 
-Lee todos los tipos de servicio y, para cada plan desde el 1 de enero del año pasado hasta hoy,
-quién estuvo programado en los equipos de voces, banda y sonido (posición y estado).
-Los conteos se hacen en el navegador (template.html) para poder filtrar por periodo,
-tipo de evento y equipo sin volver a correr esto.
+1. Participación: para cada plan desde el 1 de enero del año pasado, quién estuvo programado en voces,
+   banda y sonido (posición y estado). También lee los planes de las próximas ~9 semanas (no cuentan
+   como participación; sirven para ver quién ya está programado al armar las voces).
+2. Disponibilidad: los miembros de esos equipos (según sus posiciones en Planning Center) y sus
+   blockout dates, de 4 semanas atrás a ~6 meses adelante. NO se guarda el motivo del blockout.
+3. Armar voces: los niveles de cada voz, guardados como tags de persona en Planning Center Services
+   (grupos de tags: Rango Vocal, Desarrollo Vocal, Armonización, Presencia Escénica).
 
+Los conteos y vistas se hacen en el navegador (template.html).
 Credenciales: PCO_APP_ID y PCO_SECRET (Personal Access Token de Planning Center).
 Salida: index.html SIN cifrar en PAGE_OUT. El workflow lo cifra antes de publicarlo; nunca se commitea.
 """
-import base64, json, os, re, sys, time, urllib.error, urllib.request
-from datetime import date, datetime, timedelta, timezone
+import base64, calendar, json, os, re, sys, time, unicodedata, urllib.error, urllib.request
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 API = "https://api.planningcenteronline.com/services/v2"
+TZ = ZoneInfo("America/New_York")
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.environ.get("PAGE_OUT", os.path.join(HERE, "index.html"))
+DAYS_BACK, DAYS_AHEAD, FUTURE_PLANS = 28, 183, 63
+# Eventos del proyecto "Calendario de Eventos" (repo público). La página los vuelve a leer en vivo al abrirse.
+EVENTOS_URL = os.environ.get("EVENTOS_URL", "https://raw.githubusercontent.com/danielsc1012/calendario-northwood/main/eventos.json")
 # Equipos que cuentan, por nombre (en cualquier tipo de servicio)
 TEAM_KIND = [
     ("V", re.compile(r"^(vocals?|voces|vocal team)$", re.I)),
@@ -21,6 +30,11 @@ TEAM_KIND = [
     ("S", re.compile(r"^(sound|sonido|audio)$", re.I)),
 ]
 SUNDAY_HINT = re.compile(r"sunday|domin", re.I)
+LEADER_POS = re.compile(r"worship leader|l[ií]der de alabanza|lead vocal|^l[ií]der$", re.I)
+# Grupos de tags de persona en Planning Center Services (se buscan sin importar acentos ni mayúsculas)
+LEVEL_FIELDS = {"r": "rango vocal", "d": "desarrollo vocal", "a": "armonizacion", "p": "presencia escenica"}
+RANGOS = ["bajo", "baritono", "tenor", "alto", "mezzo", "soprano"]
+MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
 TOKEN = base64.b64encode(f"{os.environ['PCO_APP_ID']}:{os.environ['PCO_SECRET']}".encode()).decode()
 _calls = 0
@@ -43,7 +57,7 @@ def get(url, allow_404=False):
             if e.code >= 500:
                 time.sleep(5 * (attempt + 1))
                 continue
-            if e.code in (403, 404) and allow_404:
+            if e.code in (401, 403, 404) and allow_404:
                 return None
             raise
         except urllib.error.URLError:
@@ -65,12 +79,193 @@ def rel_id(obj, name):
     return ((((obj.get("relationships") or {}).get(name) or {}).get("data")) or {}).get("id")
 
 
-MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+def norm(s):
+    s = unicodedata.normalize("NFKD", s or "")
+    s = "".join(c for c in s if not unicodedata.combining(c)).lower()
+    return " ".join(re.sub(r"[^a-z0-9+\s]", " ", s).split())
+
+
+# ---------- blockouts (misma lógica que Disponibilidad del Equipo) ----------
+def parse_dt(s, tz):
+    return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(tz)
+
+
+def hora(dt):
+    h = dt.hour % 12 or 12
+    return f"{h}:{dt.minute:02d} {'am' if dt.hour < 12 else 'pm'}"
+
+
+def segment(s, e, tz):
+    """[fecha_inicio, fecha_fin (inclusive), hora_salida o '', hora_regreso o ''] en hora local."""
+    s, e = parse_dt(s, tz), parse_dt(e, tz)
+    full_start = s.hour == 0 and s.minute == 0
+    if e > s and e.hour == 0 and e.minute == 0:
+        e_eff, full_end = e - timedelta(seconds=1), True
+    else:
+        e_eff, full_end = e, (e.hour == 23 and e.minute >= 59)
+    if e_eff < s:
+        e_eff = s
+    return [s.date().isoformat(), e_eff.date().isoformat(), "" if full_start else hora(s), "" if full_end else hora(e)]
+
+
+def add_months(d, n):
+    m = d.month - 1 + n
+    y, m = d.year + m // 12, m % 12 + 1
+    if d.day > calendar.monthrange(y, m)[1]:
+        return None
+    return d.replace(year=y, month=m)
+
+
+def expand(a, tz, limit):
+    """Respaldo por si Planning Center no da las fechas de un blockout que se repite."""
+    s, e = parse_dt(a["starts_at"], tz).replace(tzinfo=None), parse_dt(a["ends_at"], tz).replace(tzinfo=None)
+    m = re.search(r"(\d+)", a.get("repeat_frequency") or "")
+    n = int(m.group(1)) if m else 1
+    period = (a.get("repeat_period") or "week").lower().rstrip("s")
+    until = a.get("repeat_until")
+    stop = min(limit, date.fromisoformat(until[:10])) if until else limit
+    dur, out, k = e - s, [], 0
+    while k < 1000:
+        if period.startswith("day"):
+            cur = s + timedelta(days=n * k)
+        elif period.startswith("month"):
+            cur = add_months(s, n * k)
+        elif period.startswith("year"):
+            cur = add_months(s, 12 * n * k)
+        else:
+            cur = s + timedelta(weeks=n * k)
+        k += 1
+        if cur is None:
+            continue
+        if cur.date() > stop:
+            break
+        out.append((cur.replace(tzinfo=tz).isoformat(), (cur + dur).replace(tzinfo=tz).isoformat()))
+    return out
+
+
+def blockouts(pid, start, end):
+    segs = []
+    for page in paginate(f"/people/{pid}/blockouts?per_page=100", allow_404=True):
+        for b in page["data"]:
+            a = b["attributes"]
+            if not a.get("starts_at") or not a.get("ends_at"):
+                continue
+            try:
+                tz = ZoneInfo(a.get("time_zone") or "America/New_York")
+            except Exception:
+                tz = TZ
+            freq = (a.get("repeat_frequency") or "no_repeat").lower()
+            if freq in ("no_repeat", "none", ""):
+                occ = [(a["starts_at"], a["ends_at"])]
+            else:
+                occ = []
+                for dp in paginate(f"/people/{pid}/blockouts/{b['id']}/blockout_dates?per_page=100", allow_404=True):
+                    for x in dp["data"]:
+                        xa = x["attributes"]
+                        if xa.get("starts_at") and xa.get("ends_at"):
+                            occ.append((xa["starts_at"], xa["ends_at"]))
+                if not occ:
+                    occ = expand(a, tz, end)
+            for s, e in occ:
+                seg = segment(s, e, tz)
+                if seg[1] >= start.isoformat() and seg[0] <= end.isoformat():
+                    segs.append(seg)
+    return [list(x) for x in sorted({tuple(x) for x in segs})]
+
+
+def load_events():
+    try:
+        with urllib.request.urlopen(urllib.request.Request(EVENTOS_URL, headers={"Accept": "application/json"}), timeout=30) as r:
+            j = json.load(r)
+        keep = ("nombre", "inicio", "fin", "publico", "grupo", "tentativo")
+        evs = [{k: e[k] for k in keep if k in e} for e in j.get("eventos", []) if e.get("inicio")]
+        print(f"Eventos del Calendario de Eventos: {len(evs)}")
+        return evs, j.get("actualizado", "")
+    except Exception as e:
+        print(f"aviso · no se pudieron leer los eventos ({EVENTOS_URL}): {e}")
+        return [], ""
+
+
+# ---------- niveles de voces (tags de persona en Planning Center Services) ----------
+def parse_level(v):
+    n = norm(v)
+    if not n:
+        return 0
+    if re.search(r"\balt[oa]\b|\bhigh\b|\bavanzad", n):
+        return 3
+    if re.search(r"\bmedi[oa]\b|\bmid", n):
+        return 2
+    if re.search(r"\bbaj[oa]\b|\blow\b|\binicial", n):
+        return 1
+    m = re.search(r"[123]", n)
+    return int(m.group()) if m else 0
+
+
+def parse_armon(v):
+    n = norm(v)
+    if "3" in n or "tercera" in n:
+        return 3
+    if "2" in n or "segunda" in n:
+        return 2
+    if "1" in n or "primera" in n or "melodia" in n:
+        return 1
+    return parse_level(v)
+
+
+def parse_rango(v):
+    n = norm(v)
+    for i, r in enumerate(RANGOS):
+        if n.startswith(r) or r in n.split():
+            return i + 1
+    return 0
+
+
+def load_levels(pids):
+    """{pid: [rango, desarrollo, armonización, presencia]} (0 = sin dato) y un aviso si algo falló.
+
+    Los niveles son tags de persona en Planning Center Services, en cuatro grupos de tags
+    (Rango Vocal, Desarrollo Vocal, Armonización, Presencia Escénica). Si alguien tiene dos tags
+    del mismo grupo, se usa el nivel más alto (en rango, el primero) y se avisa.
+    """
+    grupos_vistos, out, dobles = set(), {}, []
+    for pid in pids:
+        vals = {}
+        for page in paginate(f"/people/{pid}/tags?include=tag_group&per_page=100", allow_404=True):
+            groups = {x["id"]: norm(x["attributes"].get("name")) for x in page.get("included", []) if x.get("type") == "TagGroup"}
+            for t in page["data"]:
+                gname = groups.get(rel_id(t, "tag_group"), "")
+                for k, want in LEVEL_FIELDS.items():
+                    if gname == want or gname.startswith(want):
+                        grupos_vistos.add(k)
+                        vals.setdefault(k, []).append(t["attributes"].get("name") or "")
+        if not vals:
+            continue
+        def best(k, f):
+            xs = [f(v) for v in vals.get(k, [])]
+            xs = [x for x in xs if x]
+            if len(xs) > 1:
+                dobles.append(pid)
+            return (xs[0] if k == "r" else max(xs)) if xs else 0
+        out[pid] = [best("r", parse_rango), best("d", parse_level), best("a", parse_armon), best("p", parse_level)]
+    aviso = ""
+    if not grupos_vistos:
+        aviso = "Nadie tiene todavía tags de niveles en Planning Center Services."
+    if dobles:
+        aviso += f" {len(set(dobles))} persona(s) tienen dos tags del mismo grupo; se usó el nivel más alto."
+    return out, aviso.strip()
+
+
+def person_name(attrs):
+    n = (attrs.get("full_name") or attrs.get("name") or "").strip()
+    if not n:
+        n = f"{attrs.get('first_name') or ''} {attrs.get('last_name') or ''}".strip()
+    return n
 
 
 def main():
-    today = datetime.now(timezone(timedelta(hours=-5))).date()
+    today = datetime.now(TZ).date()
     start = date(today.year - 1, 1, 1)
+    fut_end = today + timedelta(days=FUTURE_PLANS)
 
     # ---- tipos de servicio ----
     st_ids, st_names = [], []
@@ -91,13 +286,14 @@ def main():
                     team_kind[t["id"]] = kind
     print(f"Equipos de voces/banda/sonido: {len(team_kind)}")
 
-    people, person_index = [], {}
+    people, person_index, pids = [], {}, []
     positions, pos_index = [], {}
 
     def person_idx(pid, name):
         if pid not in person_index:
             person_index[pid] = len(people)
             people.append(name.strip())
+            pids.append(pid)
         return person_index[pid]
 
     def pos_idx(kind, name):
@@ -107,6 +303,7 @@ def main():
             positions.append([kind, name])
         return pos_index[key]
 
+    # ---- planes (pasados = participación; próximas semanas = ya programados) ----
     plans, assigns = [], []
     for si, sid in enumerate(st_ids):
         url = f"/service_types/{sid}/plans?filter=after&after={start.isoformat()}&order=sort_date&per_page=100"
@@ -118,7 +315,7 @@ def main():
                 if not sd:
                     continue
                 d = date.fromisoformat(sd)
-                if d > today:
+                if d > fut_end:
                     done = True
                     break
                 if d < start:
@@ -140,10 +337,73 @@ def main():
                         assigns.append([person_idx(pid, a["name"]), pi_plan, pos_idx(kind, pos), st])
             if done:
                 break
-        print(f"  {st_names[si]}: {len(plans) - n0} eventos")
+        print(f"  {st_names[si]}: {len(plans) - n0} eventos (incluye próximas {FUTURE_PLANS // 7} semanas)")
+
+    # ---- miembros de cada equipo (por sus posiciones en Planning Center) ----
+    member = {}  # pid -> {"k": set(kinds), "lead": bool}
+    for tid, kind in team_kind.items():
+        n_team = 0
+        for tp_page in paginate(f"/teams/{tid}/team_positions?per_page=100", allow_404=True):
+            for tp in tp_page["data"]:
+                pos_name = (tp["attributes"].get("name") or "").strip()
+                for ap in paginate(f"/teams/{tid}/team_positions/{tp['id']}/person_team_position_assignments?include=person&per_page=100", allow_404=True):
+                    inc = {x["id"]: x["attributes"] for x in ap.get("included", []) if x.get("type") == "Person"}
+                    for asg in ap["data"]:
+                        pid = rel_id(asg, "person")
+                        at = inc.get(pid, {})
+                        if not pid or at.get("archived") or at.get("archived_at") or (at.get("status") or "").lower() == "inactive":
+                            continue
+                        name = person_name(at)
+                        if not name:
+                            continue
+                        person_idx(pid, name)
+                        m = member.setdefault(pid, {"k": set(), "lead": False})
+                        m["k"].add(kind)
+                        if kind == "V" and LEADER_POS.search(pos_name):
+                            m["lead"] = True
+                        n_team += 1
+        print(f"  equipo {tid} ({kind}): {n_team} asignaciones de posición")
+    # respaldo: si un equipo no tiene posiciones asignadas, usar a quien sirvió ahí en los últimos 12 meses
+    recent = (today - timedelta(days=365)).isoformat()
+    kinds_found = {k for m in member.values() for k in m["k"]}
+    for pi, pl, po, st in assigns:
+        kind, pos = positions[po]
+        sd = plans[pl][0]
+        if st != "C" or not (recent <= sd <= today.isoformat()):
+            continue
+        pid = pids[pi]
+        if kind not in kinds_found:
+            member.setdefault(pid, {"k": set(), "lead": False})["k"].add(kind)
+        # quien ha dirigido alabanza en el último año también cuenta como líder posible
+        if kind == "V" and LEADER_POS.search(pos) and pid in member:
+            member[pid]["lead"] = True
+    if not member:
+        sys.exit("No se encontraron miembros de voces, banda ni sonido.")
+    print(f"Miembros: {len(member)} (voces {sum('V' in m['k'] for m in member.values())}, "
+          f"banda {sum('B' in m['k'] for m in member.values())}, sonido {sum('S' in m['k'] for m in member.values())})")
+
+    # ---- blockouts ----
+    events, ev_upd = load_events()
+    d_start, d_end = today - timedelta(days=DAYS_BACK), today + timedelta(days=DAYS_AHEAD)
+    roster = []
+    for pid, m in member.items():
+        b = blockouts(pid, d_start, d_end)
+        roster.append({"i": person_index[pid], "k": "".join(k for k in "VBS" if k in m["k"]), "lead": int(m["lead"]), "b": b})
+    print(f"Blockouts leídos: {sum(len(r['b']) for r in roster)} en {sum(1 for r in roster if r['b'])} personas")
+
+    # ---- niveles de las voces ----
+    vocal_pids = [pids[r["i"]] for r in roster if "V" in r["k"]]
+    levels, lv_warn = load_levels(vocal_pids)
+    for r in roster:
+        lv = levels.get(pids[r["i"]])
+        if lv and any(lv):
+            r["lv"] = lv
+    print(f"Niveles: {sum(1 for r in roster if r.get('lv'))}/{len(vocal_pids)} voces con datos" + (f" · aviso: {lv_warn}" if lv_warn else ""))
 
     data = {"gen": today.isoformat(), "start": start.isoformat(), "st": st_names, "sunday": sunday,
-            "plans": plans, "people": people, "pos": positions, "a": assigns}
+            "plans": plans, "people": people, "pid": pids, "pos": positions, "a": assigns,
+            "roster": roster, "dstart": d_start.isoformat(), "dend": d_end.isoformat(),
+            "ev": events, "evUpd": ev_upd, "evUrl": EVENTOS_URL, "lvWarn": lv_warn}
     updated = f"{today.day} de {MESES[today.month - 1]} de {today.year}"
     with open(os.path.join(HERE, "template.html"), encoding="utf-8") as f:
         tpl = f.read()
@@ -151,7 +411,8 @@ def main():
         "__DATA__", json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
     with open(OUT, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"index.html generado: {len(people)} personas, {len(plans)} eventos, {len(assigns)} programaciones, {_calls} consultas.")
+    print(f"index.html generado: {len(people)} personas, {len(plans)} eventos, {len(assigns)} programaciones, "
+          f"{len(roster)} miembros, {_calls} consultas.")
     if not people:
         sys.exit("No se encontró a nadie programado: revisa las credenciales o los nombres de los equipos.")
 
