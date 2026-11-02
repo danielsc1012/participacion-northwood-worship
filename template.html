@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap">
 <style>
-/* Encabezado → pestañas principales (Participación · Disponibilidad · Armar voces) → cada vista con su propio estilo acotado (#p-part, #p-disp, #p-arm) */
+/* Encabezado → pestañas principales (Participación · Riesgo · Disponibilidad · Plan mensual · Plan semanal) → cada vista con su propio estilo acotado (#p-part, #p-disp, #p-arm) */
 :root{
   --bg:#f5f6f6; --surface:#ffffff; --fg:#1c1e1e; --body:#4a4d4d; --muted:#6e7272; --line:#dcdede; --track:#ebeded;
   --teal:#00babc; --teal-ink:#00696b; --teal-soft:#e6f8f8; --on-teal:#062b2b; --col:#f0fafa; --orange-ink:#c4491d;
@@ -570,10 +570,10 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
 
   <nav class="ptabs" role="tablist" aria-label="Secciones">
     <button role="tab" data-p="part">Participación</button>
-    <button role="tab" data-p="disp">Disponibilidad</button>
-    <button role="tab" data-p="arm">Armar voces</button>
-    <button role="tab" data-p="mes">Plan del mes</button>
     <button role="tab" data-p="riesgo">Riesgo</button>
+    <button role="tab" data-p="disp">Disponibilidad</button>
+    <button role="tab" data-p="mes">Plan mensual</button>
+    <button role="tab" data-p="arm">Plan semanal</button>
   </nav>
 
   <!-- ===== Participación ===== -->
@@ -738,7 +738,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
       <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
       <span><b class="lgk">H</b>Harmony (1ra-2da-3ra) · <b class="lgk">P</b>Stage Presence · <b class="lgk">L</b>Level (1 In Progress, 2 Good, 3 Strong)</span>
     </div>
-    <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en Armar voces. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
+    <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en el Plan semanal. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
 
   <!-- ===== Riesgo ===== -->
@@ -765,7 +765,7 @@ const SUBS={
   mes:"Arma las voces de todos los domingos del mes. La meta es que cada voz sirva 2 veces.",
   riesgo:"Riesgo de agotamiento de voces, banda y sonido, contando todo lo que sirven en la iglesia (no solo alabanza). Mismos criterios que el Portal de Voluntarios."
 };
-const TITLES={part:"Participación",disp:"Disponibilidad",arm:"Armar voces",mes:"Plan del mes",riesgo:"Riesgo"};
+const TITLES={part:"Participación",disp:"Disponibilidad",arm:"Plan semanal",mes:"Plan mensual",riesgo:"Riesgo"};
 if(DATA.demo)document.getElementById('demob').hidden=false;
 
 /* ================= Participación ================= */
@@ -1667,7 +1667,7 @@ function renderMonth(){
   M$('#mpco').hidden=!hasPco;
   // tabla
   let h='<table><thead><tr><th class="nm">Voz</th>';
-  ss.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}" data-d="${d}" title="Abrir en Armar voces">dom<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b></th>`;});
+  ss.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}" data-d="${d}" title="Abrir en el Plan semanal">dom<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b></th>`;});
   h+='<th class="ct">Veces</th></tr></thead><tbody>';
   const T={};ss.forEach(d=>T[d]=getT(d));
   [6,5,4,3,2,1,0].forEach(r=>{

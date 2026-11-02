@@ -1,11 +1,12 @@
 # NW HQ · Northwood Worship
 
-Página privada (con contraseña) del liderazgo del equipo de alabanza, con tres pestañas:
+Página privada (con contraseña) del liderazgo del equipo de alabanza, con cinco pestañas (en este orden): Participación, Riesgo, Disponibilidad, Plan mensual y Plan semanal.
 
 - **Participación**: cuántas veces ha servido cada persona en **voces, banda y sonido**, con filtros por equipo, tipo de evento (solo domingos o todos) y periodo. Cada persona cuenta **una vez por evento**, aunque sirva en dos posiciones.
 - **Disponibilidad**: los blockout dates de quienes tienen una posición en voces, banda o sonido (calendario por mes, por persona, eventos, "¿Quién está disponible?" y próximas ausencias). No se muestran los motivos.
-- **Plan del mes**: matriz de voces × domingos del mes para armar todas las semanas a la vez. La meta es que cada voz sirva 2 veces (0–1 en blanco, 2 en teal, 3 en naranja, 4 o más en rojo). Comparte los equipos con Armar voces.
-- **Armar voces**: escoger fecha y voz líder, y armar las voces (5 o 6) buscando balance de rango vocal, armonización, desarrollo vocal y presencia escénica. Solo cuentan las voces con su tag de Vocals - Range (las voces invitadas quedan fuera). Los niveles se leen de **tags de persona en Planning Center Services**:
+- **Riesgo**: riesgo de agotamiento de voces, banda y sonido con los mismos criterios del Portal de Voluntarios, contando también lo que sirven en otros ministerios.
+- **Plan mensual**: matriz de voces × domingos del mes para armar todas las semanas a la vez. La meta es que cada voz sirva 2 veces (0–1 en blanco, 2 en teal, 3 en naranja, 4 o más en rojo). Comparte los equipos con Armar voces.
+- **Plan semanal**: escoger fecha y voz líder, y armar las voces (5 o 6) buscando balance de rango vocal, armonización, desarrollo vocal y presencia escénica. Solo cuentan las voces con su tag de Vocals - Range (las voces invitadas quedan fuera). Los niveles se leen de **tags de persona en Planning Center Services**:
   - Vocals - Range: Bass, Baritone, Tenor, Alto, Mezzo Soprano, Soprano
   - Vocals - Level: In Progress, Good, Strong
   - Vocals - Stage Presence: In Progress, Good, Strong
