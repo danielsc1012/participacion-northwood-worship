@@ -647,7 +647,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
       <span><i class="lg-c0"></i>0–1 veces</span><span><i class="lg-c2"></i>2 · la meta</span><span><i class="lg-c3"></i>3</span><span><i class="lg-c4"></i>4 o más</span>
       <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
     </div>
-    <p class="note">Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en Armar voces. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
+    <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en Armar voces. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
 
   <footer>Fuente: Planning Center Services. Última actualización: __UPDATED__ · se actualiza cada mañana. Página privada del liderazgo del equipo de alabanza de Iglesia Northwood.</footer>
@@ -1146,7 +1146,9 @@ const sundaySet=new Set(DATA.sunday);
 const served={}; // i -> fechas (domingos) con voces confirmadas
 DATA.a.forEach(([pi,pl,po,st])=>{const [k]=DATA.pos[po];const [d,si]=DATA.plans[pl];
   if(k!=='V'||st!=='C'||!sundaySet.has(si)||d>DATA.gen)return;(served[pi]=served[pi]||new Set()).add(d);});
-const V=DATA.roster.filter(r=>r.k.includes('V')).map(r=>{
+// solo las voces con tag de Range en Planning Center (las voces invitadas no cuentan)
+const NORANGE=DATA.roster.filter(r=>r.k.includes('V')&&!(r.lv&&r.lv[0])).length;
+const V=DATA.roster.filter(r=>r.k.includes('V')&&r.lv&&r.lv[0]).map(r=>{
   const map={};
   r.b.forEach(([sd,ed,ps,pe])=>{for(let d=sd;d<=ed;d=add(d,1)){const part=(d===sd&&!!ps)||(d===ed&&!!pe);if(!map[d]||map[d].part)map[d]={part,lab:part?(sd===ed?(ps&&pe?`${ps}–${pe}`:ps?`desde ${ps}`:`hasta ${pe}`):(d===sd?`desde ${ps}`:`hasta ${pe}`)):''};}});
   const ds=[...(served[r.i]||[])].sort();
@@ -1331,11 +1333,11 @@ function renderTeam(){
 }
 function renderLvTable(){
   const nl=V.filter(v=>!v.lv).length;
-  $('#alvl').querySelector('summary').textContent=`Todas las voces y sus niveles (${V.length}${nl?` · ${nl} sin niveles`:''})`;
+  $('#alvl').querySelector('summary').textContent=`Todas las voces y sus niveles (${V.length}${NORANGE?` · ${NORANGE} sin Range en Planning Center no aparecen`:''})`;
   $('#alvt').innerHTML=`<table><thead><tr><th>Voz</th><th>Range</th><th>Level</th><th>Harmony</th><th>Stage Presence</th><th>Dirige</th><th></th></tr></thead><tbody>${V.map(v=>`<tr><td><b>${esc(v.n)}</b></td><td class="${rng(v)?'':'na'}">${RANGO[rng(v)]}</td><td class="${dev(v)?'':'na'}">${LVL[dev(v)]}</td><td class="${arm(v)?'':'na'}">${armLong(arm(v))}</td><td class="${pres(v)?'':'na'}">${LVL[pres(v)]}</td><td>${v.lead?'Sí':''}</td><td>${editLink(v)}</td></tr>`).join('')}</tbody></table>`;
 }
 function renderSetup(){
-  const el=$('#asetup');const none=!V.some(v=>v.lv);
+  const el=$('#asetup');const none=!V.length;
   if(!DATA.lvWarn&&!none){el.hidden=true;return;}
   el.hidden=false;
   el.innerHTML=`<b>${none?'Todavía no hay niveles registrados.':'Aviso sobre los niveles.'}</b> ${esc(DATA.lvWarn||'')}
