@@ -50,7 +50,7 @@ jobs:
         run: |
           # Salt fijo (no es secreto): así "Recordarme" sigue funcionando después de cada actualización diaria
           npx --yes staticrypt@3.5.4 "$RUNNER_TEMP/index.html" -d _site --short -c false --remember 30 -s 5a52f0aef4b25d0f95fd9036e0eda892 \
-            --template-title "Equipo de alabanza · Northwood Worship" \
+            --template-title "NW HQ · Northwood Worship" \
             --template-instructions "Iglesia Northwood · Acceso solo para el liderazgo del equipo de alabanza." \
             --template-button "Entrar" --template-placeholder "Contraseña" \
             --template-remember "Recordarme en este equipo" --template-error "Contraseña incorrecta" \

@@ -1,4 +1,4 @@
-# Equipo de alabanza · Northwood Worship
+# NW HQ · Northwood Worship
 
 Página privada (con contraseña) del liderazgo del equipo de alabanza, con tres pestañas:
 
