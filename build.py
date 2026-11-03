@@ -417,11 +417,10 @@ def main():
         pid = pids[pi]
         if kind not in kinds_found:
             member.setdefault(pid, {"k": set(), "lead": False})["k"].add(kind)
-        # quien ha dirigido alabanza en el último año también cuenta como líder posible
-        if kind == "V" and LEADER_POS.search(pos) and pid in member:
-            member[pid]["lead"] = True
+    # "Dirige" = solo quien tiene una posición de líder en el equipo de voces en Planning Center (decisión de Daniel, 2026-11-03)
     if not member:
         sys.exit("No se encontraron miembros de voces, banda ni sonido.")
+    print(f"Pueden dirigir (posición de líder en voces): {sum(1 for m in member.values() if m['lead'])}")
     print(f"Miembros: {len(member)} (voces {sum('V' in m['k'] for m in member.values())}, "
           f"banda {sum('B' in m['k'] for m in member.values())}, sonido {sum('S' in m['k'] for m in member.values())})")
 
