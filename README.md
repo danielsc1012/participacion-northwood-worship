@@ -6,6 +6,7 @@ Página privada (con contraseña) del liderazgo del equipo de alabanza, con cinc
 - **Disponibilidad**: los blockout dates de quienes tienen una posición en voces, banda o sonido (calendario por mes, por persona, eventos, "¿Quién está disponible?" y próximas ausencias). No se muestran los motivos.
 - **Riesgo**: riesgo de agotamiento de voces, banda y sonido con los mismos criterios del Portal de Voluntarios, contando también lo que sirven en otros ministerios.
 - **Plan mensual**: matriz de voces × domingos del mes para armar todas las semanas a la vez. La meta es que cada voz sirva 2 veces (0–1 en blanco, 2 en teal, 3 en naranja, 4 o más en rojo). Comparte los equipos con el Plan semanal.
+- **Ensamble**: para cada servicio se lee su tiempo de ensayo en Planning Center ("Ensamble (Northwood Worship)"); si un domingo todavía no lo tiene, se supone el martes anterior. Quien tiene blockout el día del ensamble cuenta como no disponible para ese servicio.
 - **Plan semanal**: escoger fecha y voz líder, y armar las voces (5 o 6) buscando balance de rango vocal, armonización, desarrollo vocal y presencia escénica. Solo cuentan las voces con su tag de Vocals - Range (las voces invitadas quedan fuera). Los niveles se leen de **tags de persona en Planning Center Services**:
   - Vocals - Range: Bass, Baritone, Tenor, Alto, Mezzo Soprano, Soprano
   - Vocals - Level: In Progress, Good, Strong

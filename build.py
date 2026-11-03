@@ -175,6 +175,24 @@ def blockouts(pid, start, end):
     return [list(x) for x in sorted({tuple(x) for x in segs})]
 
 
+REHEARSAL = re.compile(r"ensamble|rehearsal|ensayo", re.I)
+
+
+def rehearsals(sid, plan_id):
+    """Ensayos del plan ("Ensamble (Northwood Worship)" u otro tiempo de tipo rehearsal): [[fecha, hora, nombre], ...]."""
+    out = []
+    for page in paginate(f"/service_types/{sid}/plans/{plan_id}/plan_times?per_page=100", allow_404=True):
+        for t in page["data"]:
+            a = t["attributes"]
+            name = (a.get("name") or "").strip()
+            if not a.get("starts_at") or not ((a.get("time_type") or "") == "rehearsal" or REHEARSAL.search(name)):
+                continue
+            dt = parse_dt(a["starts_at"], TZ)
+            out.append([dt.date().isoformat(), hora(dt), name or "Ensayo"])
+    # primero los que se llaman "Ensamble"
+    return sorted(out, key=lambda x: (0 if "ensamble" in norm(x[2]) else 1, x[0], x[1]))
+
+
 def load_events():
     try:
         with urllib.request.urlopen(urllib.request.Request(EVENTOS_URL, headers={"Accept": "application/json"}), timeout=30) as r:
@@ -336,7 +354,7 @@ def main():
                     continue
                 title = (p["attributes"].get("title") or p["attributes"].get("series_title") or "").strip()
                 pi_plan = len(plans)
-                plans.append([sd, si, title])
+                plans.append([sd, si, title, rehearsals(sid, p["id"]) if d >= today - timedelta(days=DAYS_BACK) else []])
                 for mp in paginate(f"/service_types/{sid}/plans/{p['id']}/team_members?per_page=100"):
                     for m in mp["data"]:
                         a = m["attributes"]
@@ -361,7 +379,8 @@ def main():
                         assigns.append([person_idx(pid, a["name"]), pi_plan, pos_idx(kind, pos), st])
             if done:
                 break
-        print(f"  {st_names[si]}: {len(plans) - n0} eventos (incluye próximas {FUTURE_PLANS // 7} semanas)")
+        print(f"  {st_names[si]}: {len(plans) - n0} eventos (incluye próximas {FUTURE_PLANS // 7} semanas), "
+              f"{sum(1 for x in plans[n0:] if x[3])} con ensamble")
 
     # ---- miembros de cada equipo (por sus posiciones en Planning Center) ----
     member = {}  # pid -> {"k": set(kinds), "lead": bool}

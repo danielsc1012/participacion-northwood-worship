@@ -567,6 +567,14 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
 #p-mes .m1,#p-mes td.c.m1,#p-mes thead th.sd.m1{border-right:2px solid var(--teal)}
 #p-mes td.tot.all b{background:none!important;color:var(--body)!important;box-shadow:inset 0 0 0 1px var(--line)}
 @media (max-width:620px){#p-mes td.tot.all{display:none}}
+
+#p-mes thead th.sd small.ens{display:block;font-size:10.5px;font-weight:500;color:var(--ev-ink);margin-top:1px;white-space:nowrap}
+#p-mes thead th.sd small.ens.sup{color:var(--muted)}
+#p-mes td.c.be span{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ev) 40%,transparent) 0 3px,transparent 3px 7px);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ev) 55%,transparent)}
+#p-mes td.c.be.on span{background:var(--teal);box-shadow:inset 0 0 0 2.5px var(--ev)}
+#p-mes td.c.be.ld span{background:var(--teal-ink);box-shadow:inset 0 0 0 2.5px var(--ev)}
+#p-mes .lg-be{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ev) 40%,transparent) 0 3px,transparent 3px 7px);box-shadow:inset 0 0 0 1px var(--line)}
+#p-arm .when small.ens{display:block;font-family:var(--body-font);font-size:13.5px;font-weight:600;color:var(--ev-ink);margin-top:4px}
 </style>
 </head>
 <body>
@@ -750,10 +758,10 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
     <div class="mwrap" id="mgrid"></div>
     <div class="legend mleg">
       <span><i class="lg-c0"></i>0–1 veces</span><span><i class="lg-c2"></i>2 · la meta</span><span><i class="lg-c3"></i>3</span><span><i class="lg-c4"></i>4 o más</span>
-      <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
+      <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><i class="lg-be"></i>No puede ir al ensamble</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
       <span><b class="lgk">H</b>Harmony (1ra-2da-3ra) · <b class="lgk">P</b>Stage Presence · <b class="lgk">L</b>Level (1 In Progress, 2 Good, 3 Strong)</span>
     </div>
-    <p class="note">Con "Semanas antes" y "Semanas después" se ven también los domingos alrededor del mes (columnas grises); el color y "Veces en el mes" siguen contando solo el mes, y "Total visible" cuenta todas las columnas. En los domingos que ya pasaron y no se armaron aquí, se muestra lo que quedó en Planning Center. "Sugerir mes" evita poner a alguien dos domingos seguidos, también con las semanas de antes y después. Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en el Plan semanal. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
+    <p class="note">Debajo de cada domingo sale el día de su ensamble (de Planning Center; con "?" si todavía no está y se supone el martes antes). Quien tiene blockout el día del ensamble sale rayado en azul: se puede marcar a mano, pero "Sugerir mes" no lo toma en cuenta. Con "Semanas antes" y "Semanas después" se ven también los domingos alrededor del mes (columnas grises); el color y "Veces en el mes" siguen contando solo el mes, y "Total visible" cuenta todas las columnas. En los domingos que ya pasaron y no se armaron aquí, se muestra lo que quedó en Planning Center. "Sugerir mes" evita poner a alguien dos domingos seguidos, también con las semanas de antes y después. Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en el Plan semanal. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
 
   <!-- ===== Riesgo ===== -->
@@ -1442,7 +1450,22 @@ function loadDraft(){const s=store.get('t.'+date,null);lead=s&&VI.has(s.l)?s.l:n
 function saveDraft(){if(lead===null&&!mem.length)store.del('t.'+date);else store.set('t.'+date,{l:lead,m:mem});}
 loadDraft();
 
-const outOn=(v,d)=>v.map[d]||null;               // {part,lab} o null
+// ensamble de un servicio: el tiempo de ensayo del plan en Planning Center ("Ensamble (Northwood Worship)");
+// si un domingo todavía no lo tiene, se supone el martes anterior
+const ENS={};
+DATA.plans.forEach(([d,si,,r])=>{if(!r||!r.length)return;const pre=r.filter(x=>x[0]<=d);if(!pre.length)return;
+  const sun=sundaySet.has(si);if(!ENS[d]||(sun&&!ENS[d].sun))ENS[d]={d:pre[0][0],h:pre[0][1],n:pre[0][2],sun,sup:false};});
+const ensOf=d=>ENS[d]||(dow(d)===0?{d:add(d,-5),h:'',n:'Ensamble',sup:true}:null);
+const ensTxt=(e,short)=>e?`${short?'ens. ':'Ensamble: '}${fmtDay(e.d)}${e.h&&!short?' · '+e.h:''}${e.sup?(short?'?':' (supuesto: el martes antes; no está en Planning Center)'):''}`:'';
+// fuera para un servicio = blockout ese día, o blockout el día de su ensamble
+// {part, lab, ens} o null; ens = el problema es el ensamble
+const outOn=(v,d)=>{
+  const s=v.map[d];if(s&&!s.part)return {part:false,lab:'',ens:false};
+  const e=ensOf(d),er=e&&e.d!==d?v.map[e.d]:null;
+  if(er&&!er.part)return {part:false,lab:`no puede ir al ensamble (${fmtDay(e.d)})`,ens:true};
+  if(s)return {part:true,lab:s.lab,ens:false};
+  if(er)return {part:true,lab:`ensamble ${fmtDay(e.d)}: ${er.lab}`,ens:true};
+  return null;};
 const avail=v=>{const o=outOn(v,date);return !o||o.part;};
 // ya programados en Planning Center para la fecha
 function pcoOn(d){
@@ -1457,7 +1480,7 @@ const pips=(n,label)=>`<span title="${label}: ${LVL[n]}">${label==='Level'?'Leve
 const rchip=v=>`<span class="rg ${REG[rng(v)]}" title="${RANGO[rng(v)]}${rng(v)?' · voz '+REGL[REG[rng(v)]]:''}">${RSH[rng(v)]}</span>`;
 const lvls=v=>v.lv?`${pips(dev(v),'Level')}<span title="Harmony: ${armLong(arm(v))}">Arm. <span class="harm">${armShort(arm(v))}</span></span>${pips(pres(v),'Stage Presence')}`:'<span>Sin tags de niveles en Planning Center</span>';
 const editLink=v=>pcoUrl(v)?`<a class="edit" href="${pcoUrl(v)}" target="_blank" rel="noopener" title="Editar tags en Planning Center Services" onclick="event.stopPropagation()">editar</a>`:'';
-function tags(v){let t='';const o=outOn(v,date);if(o&&o.part)t+=`<span class="tag">Parte del día · ${esc(o.lab)}</span>`;
+function tags(v){let t='';const o=outOn(v,date);if(o&&o.part)t+=`<span class="tag">${o.ens?'':'Parte del día · '}${esc(o.lab)}</span>`;
   if(pcoSet.has(v.i))t+=`<span class="tag ev">Ya en PCO</span>`;if(c4(v)>=3)t+=`<span class="tag">${c4(v)} de 4 domingos</span>`;return t;}
 let pcoSet=new Set();
 
@@ -1507,7 +1530,7 @@ function renderBar(){
   document.querySelectorAll('#asize button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===size)));
   document.querySelectorAll('#asort button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.s===sortBy)));
   $('#aall').checked=showAll;
-  const w=fmtLong(date);$('#awhen').textContent=w[0].toUpperCase()+w.slice(1);
+  const w=fmtLong(date);$('#awhen').innerHTML=esc(w[0].toUpperCase()+w.slice(1))+(ensOf(date)?`<small class="ens">${esc(ensTxt(ensOf(date)))}</small>`:'');
 }
 function renderPco(){
   const L=pcoOn(date);pcoSet=new Set(L.map(o=>o.i));
@@ -1523,7 +1546,7 @@ function renderLeads(){
     <span class="meta">${rchip(v)}<span>${c8(v)} en 8 sem.</span>${lastServed(v)?`<span>últ. ${fmtDay(lastServed(v))}</span>`:''}</span>
     <span class="lv">${lvls(v)}</span>${tags(v)?`<span>${tags(v)}</span>`:''}</button>`).join('')
     :`<div class="hint">${V.some(v=>v.lead)?'Nadie que dirige está disponible en esta fecha. Marca "Mostrar a todas las voces" para ver más opciones.':'No hay voces marcadas como líder en Planning Center. Marca "Mostrar a todas las voces".'}</div>`;
-  $('#aleadout').innerHTML=out.length?`<b>No disponibles:</b> ${out.map(v=>esc(v.n)).join(', ')}`:'';
+  $('#aleadout').innerHTML=out.length?`<b>No disponibles:</b> ${out.map(v=>esc(v.n)+(outOn(v,date).ens?' <small>(ensamble)</small>':'')).join(', ')}`:'';
 }
 function vrow(v){
   const sel=mem.includes(v.i), isL=v.i===lead, full=mem.length+(lead!==null?1:0)>=size&&!sel;
@@ -1545,7 +1568,7 @@ function renderList(){
     h=s.map(vrow).join('');
   }
   $('#alist').innerHTML=h||'<div class="vh">Nadie disponible en esta fecha.</div>';
-  $('#aout').innerHTML=out.length?`<b>No disponibles este día (blockout):</b> ${out.map(v=>esc(v.n)).join(', ')}`:'';
+  $('#aout').innerHTML=out.length?`<b>No disponibles (blockout ese día o el día del ensamble):</b> ${out.map(v=>esc(v.n)+(outOn(v,date).ens?' <small>(ensamble)</small>':'')).join(', ')}`:'';
 }
 function chk(state,title,detail,extra=''){
   const ic={ok:'✓',wn:'!',na:'·'}[state];
@@ -1691,7 +1714,7 @@ function renderMonth(){
   // tabla
   let h='<table><thead><tr><th class="nm">Voz</th>';
   const xc=d=>inMon.has(d)?(d===ss[0]&&VS.pre.length?' m0':d===ss[ss.length-1]&&VS.post.length?' m1':''):' ext';
-  cols.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}${xc(d)}" data-d="${d}" title="Abrir en el Plan semanal">${inMon.has(d)?'dom':d<ss[0]?'antes':'después'}<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b></th>`;});
+  cols.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}${xc(d)}" data-d="${d}" title="Abrir en el Plan semanal">${inMon.has(d)?'dom':d<ss[0]?'antes':'después'}<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b>${ensOf(d)?`<small class="ens${ensOf(d).sup?' sup':''}" title="${esc(ensTxt(ensOf(d)))}">${esc(ensTxt(ensOf(d),true))}</small>`:''}</th>`;});
   h+=`<th class="ct">Veces<small>en el mes</small></th>${ext?'<th class="ct">Total<small>visible</small></th>':''}</tr></thead><tbody>`;
   const T={};cols.forEach(d=>T[d]=effT(d));
   [6,5,4,3,2,1,0].forEach(r=>{
@@ -1701,9 +1724,9 @@ function renderMonth(){
       const n=cnt.get(v.i)||0;
       h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)} <span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span>${(()=>{const r=Risk.get(v.i);return r&&r.lvl==='hi'?`<span class="rk-hi" title="${esc(r.text)}">▲ Riesgo alto</span>`:'';})()}</span><b class="mc">${n}</b></span><small title="Harmony: ${armLong(arm(v))} · Stage Presence: ${LVL[pres(v)]} · Level: ${LVL[dev(v)]}">${codes(v)}${v.lead?'<span class="ld">dirige</span>':''}</small></th>`;
       cols.forEach(d=>{
-        const t=T[d],isL=t.l===v.i,isM=t.m.includes(v.i),o=outOn(v,d),bk=o&&!o.part&&!isL&&!isM;
-        const c=['c'];if(!inMon.has(d))c.push('ext');if(t.real)c.push('real');if(xc(d).trim()&&inMon.has(d))c.push(xc(d).trim());if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
-        const tip=`${v.n} · ${fmtDay(d)} · `+(bk?'Blockout: no disponible':isL?'Líder':isM?'Voces':'Toca para agregar')+(o&&o.part?` · parte del día (${o.lab})`:'')+(o&&!o.part&&(isL||isM)?' · ¡tiene blockout!':'')+(pco[d].has(v.i)?' · ya en Planning Center':'')+(t.real?' · lo que quedó en Planning Center':'');
+        const t=T[d],isL=t.l===v.i,isM=t.m.includes(v.i),o=outOn(v,d),bk=o&&!o.part&&!o.ens&&!isL&&!isM,be=o&&!o.part&&o.ens;
+        const c=['c'];if(!inMon.has(d))c.push('ext');if(t.real)c.push('real');if(xc(d).trim()&&inMon.has(d))c.push(xc(d).trim());if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(be)c.push('be');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
+        const tip=`${v.n} · ${fmtDay(d)} · `+(bk?'Blockout: no disponible':isL?'Líder':isM?'Voces':'Toca para agregar')+(be?` · ${o.lab}`:'')+(o&&o.part?` · ${o.ens?o.lab:'parte del día ('+o.lab+')'}`:'')+(o&&!o.part&&!o.ens&&(isL||isM)?' · ¡tiene blockout!':'')+(pco[d].has(v.i)?' · ya en Planning Center':'')+(t.real?' · lo que quedó en Planning Center':'');
         h+=`<td class="${c.join(' ')}" data-d="${d}" data-i="${v.i}" title="${esc(tip)}"><span>${isL?'★':isM?'✓':''}</span></td>`;
       });
       h+=`<td class="tot"><b>${n}</b></td>${ext?`<td class="tot all"><b>${cntAll.get(v.i)||0}</b></td>`:''}</tr>`;
@@ -1723,7 +1746,7 @@ function cycle(d,i){
   const v=VI.get(i),t=effT(d);
   if(t.l===i){t.l=null;}
   else if(t.m.includes(i)){t.m=t.m.filter(x=>x!==i);if(t.l!==null)t.m.push(t.l);t.l=i;}
-  else{if(blocked(v,d))return;t.m.push(i);}
+  else{const o=outOn(v,d);if(o&&!o.part&&!o.ens)return;t.m.push(i);}
   setT(d,t);renderMonth();
 }
 function suggestMonth(){
