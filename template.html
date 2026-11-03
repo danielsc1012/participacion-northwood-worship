@@ -556,6 +556,17 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
 #p-mes .rk-hi{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:#fbe3e3;color:#a31515;margin-left:4px;vertical-align:1px;white-space:nowrap}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #p-mes .rk-hi{background:#3d1717;color:#ff9a9a}}
 :root[data-theme="dark"] #p-mes .rk-hi{background:#3d1717;color:#ff9a9a}
+
+#p-mes .mopts{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:flex-end}
+#p-mes thead th.ct small{display:block;font-weight:500;font-size:10.5px;text-transform:none}
+#p-mes thead th.sd.ext{background:var(--bg);font-style:normal}
+#p-mes thead th.sd.ext b{color:var(--muted)}
+#p-mes td.c.ext,#p-mes tfoot td.ext{background:color-mix(in srgb,var(--bg) 70%,transparent)}
+#p-mes td.c.ext span{opacity:.75}
+#p-mes .m0,#p-mes td.c.m0,#p-mes thead th.sd.m0{border-left:2px solid var(--teal)}
+#p-mes .m1,#p-mes td.c.m1,#p-mes thead th.sd.m1{border-right:2px solid var(--teal)}
+#p-mes td.tot.all b{background:none!important;color:var(--body)!important;box-shadow:inset 0 0 0 1px var(--line)}
+@media (max-width:620px){#p-mes td.tot.all{display:none}}
 </style>
 </head>
 <body>
@@ -721,7 +732,11 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
     <div class="shared" id="mshared" hidden></div>
     <div class="mbar">
       <div class="mnav"><button class="btn" id="mmprev" aria-label="Mes anterior">‹</button><h2 id="mmlabel"></h2><button class="btn" id="mmnext" aria-label="Mes siguiente">›</button></div>
-      <div class="fld">Tamaño<div class="seg" id="msize" role="group" aria-label="Voces por domingo"><button data-n="5">5 voces</button><button data-n="6">6 voces</button></div></div>
+      <div class="mopts">
+        <div class="fld">Semanas antes<div class="seg" id="mbefore" role="group" aria-label="Semanas antes del mes"><button data-n="0">0</button><button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button></div></div>
+        <div class="fld">Semanas después<div class="seg" id="mafter" role="group" aria-label="Semanas después del mes"><button data-n="0">0</button><button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button></div></div>
+        <div class="fld">Tamaño<div class="seg" id="msize" role="group" aria-label="Voces por domingo"><button data-n="5">5 voces</button><button data-n="6">6 voces</button></div></div>
+      </div>
     </div>
     <div class="mkpis" id="mkpis"></div>
     <div class="macts">
@@ -738,7 +753,7 @@ footer{font-size:12px;color:var(--muted);margin-top:28px}
       <span><b class="lgk">✓</b>Voces</span><span><b class="lgk">★</b>Líder</span><span><i class="lg-bk"></i>Blockout</span><span><b class="lgk pc">•</b>Ya en Planning Center</span>
       <span><b class="lgk">H</b>Harmony (1ra-2da-3ra) · <b class="lgk">P</b>Stage Presence · <b class="lgk">L</b>Level (1 In Progress, 2 Good, 3 Strong)</span>
     </div>
-    <p class="note">Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en el Plan semanal. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
+    <p class="note">Con "Semanas antes" y "Semanas después" se ven también los domingos alrededor del mes (columnas grises); el color y "Veces en el mes" siguen contando solo el mes, y "Total visible" cuenta todas las columnas. En los domingos que ya pasaron y no se armaron aquí, se muestra lo que quedó en Planning Center. "Sugerir mes" evita poner a alguien dos domingos seguidos, también con las semanas de antes y después. Solo aparecen las voces que tienen su tag de <b>Vocals - Range</b> en Planning Center; así las voces invitadas no cuentan. Toca una celda: la primera vez agrega a la voz a ese domingo, la segunda la hace líder ★ y la tercera la quita. Toca el encabezado de un domingo para abrirlo en el Plan semanal. "Sugerir mes" solo llena los espacios vacíos: lo que marcaste a mano no lo toca. Ser líder cuenta como una vez. El plan se guarda en este dispositivo; para compartirlo, usa "Copiar enlace del plan".</p>
   </div>
 
   <!-- ===== Riesgo ===== -->
@@ -1638,7 +1653,12 @@ const MINM=TODAY.slice(0,7), MAXM=(DATA.dend||TODAY).slice(0,7);
 let mon=store.get('mon',nextSun().slice(0,7)); if(mon<MINM)mon=MINM; if(mon>MAXM)mon=MAXM;
 const sundays=m=>{const out=[];let d=m+'-01';while(dow(d)!==0)d=add(d,1);while(d.slice(0,7)===m){out.push(d);d=add(d,7);}return out;};
 const kcls=n=>n>=4?'k4':n===3?'k3':n===2?'k2':'k0';
-function monthCounts(ss){const c=new Map();ss.forEach(d=>{const t=getT(d);[t.l,...t.m].forEach(i=>{if(i!==null)c.set(i,(c.get(i)||0)+1);});});return c;}
+let wBefore=store.get('mb',0), wAfter=store.get('ma',0);
+// equipo de un domingo: el plan guardado aquí; si no hay y el domingo ya pasó, lo que quedó en Planning Center
+const effT=d=>{const s=store.get('t.'+d,null);if(s||d>=TODAY)return Object.assign(getT(d),{real:false});
+  const L=pcoOn(d).filter(o=>VI.has(o.i));const l=L.find(o=>o.lead);return {l:l?l.i:null,m:L.filter(o=>o!==l).map(o=>o.i),real:L.length>0};};
+const visibleSundays=()=>{const ss=sundays(mon),pre=[],post=[];for(let k=wBefore;k>=1;k--)pre.push(add(ss[0],-7*k));for(let k=1;k<=wAfter;k++)post.push(add(ss[ss.length-1],7*k));return {ss,pre,post,all:[...pre,...ss,...post]};};
+function monthCounts(ss){const c=new Map();ss.forEach(d=>{const t=effT(d);[t.l,...t.m].forEach(i=>{if(i!==null)c.set(i,(c.get(i)||0)+1);});});return c;}
 function quick(ids,L){
   if(!ids.length)return null;
   const B=balance(ids,L);const o={};
@@ -1652,51 +1672,55 @@ function quick(ids,L){
 const codes=v=>{const h=arm(v)?'H.'+[1,2,3].filter(k=>arm(v)&(1<<(k-1))).join('-'):'H.—';return `<span class="cd">${h}</span><span class="cd">P.${pres(v)||'—'}</span><span class="cd">L.${dev(v)||'—'}</span>`;};
 function renderMonth(){
   if(mon<MINM)mon=MINM; if(mon>MAXM)mon=MAXM;
-  const ss=sundays(mon), cnt=monthCounts(ss);
+  const VS=visibleSundays(), ss=VS.ss, cols=VS.all, cnt=monthCounts(ss), ext=cols.length>ss.length, cntAll=ext?monthCounts(cols):cnt;
+  const inMon=new Set(ss);
   const [y,mo]=mon.split('-').map(Number);
   M$('#mmlabel').textContent=`${MESL[mo-1]} ${y}`;
   M$('#mmprev').disabled=mon<=MINM; M$('#mmnext').disabled=mon>=MAXM;
   document.querySelectorAll('#msize button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===size)));
+  document.querySelectorAll('#mbefore button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===wBefore)));
+  document.querySelectorAll('#mafter button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===wAfter)));
   // indicadores
   const k=[0,0,0,0];V.forEach(v=>{const n=cnt.get(v.i)||0;k[n>=4?3:n===3?2:n===2?1:0]++;});
   M$('#mkpis').innerHTML=[['k0',k[0],'voces con 0–1 veces'],['k2',k[1],'voces en 2 · la meta'],['k3',k[2],'voces con 3'],['k4',k[3],'voces con 4 o más']]
     .map(([c,n,l])=>`<div class="mk ${c}"><b>${n}</b><span>${l}</span></div>`).join('');
   // PCO por domingo
-  const pco={};ss.forEach(d=>pco[d]=new Set(pcoOn(d).map(o=>o.i)));
-  const hasPco=ss.some(d=>pco[d].size);
+  const pco={};cols.forEach(d=>pco[d]=new Set(pcoOn(d).map(o=>o.i)));
+  const hasPco=cols.some(d=>d>=TODAY&&pco[d].size&&!store.get('t.'+d,null));
   M$('#mpco').hidden=!hasPco;
   // tabla
   let h='<table><thead><tr><th class="nm">Voz</th>';
-  ss.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}" data-d="${d}" title="Abrir en el Plan semanal">dom<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b></th>`;});
-  h+='<th class="ct">Veces</th></tr></thead><tbody>';
-  const T={};ss.forEach(d=>T[d]=getT(d));
+  const xc=d=>inMon.has(d)?(d===ss[0]&&VS.pre.length?' m0':d===ss[ss.length-1]&&VS.post.length?' m1':''):' ext';
+  cols.forEach(d=>{const dd=Dt(d);h+=`<th class="sd${d<TODAY?' past':''}${xc(d)}" data-d="${d}" title="Abrir en el Plan semanal">${inMon.has(d)?'dom':d<ss[0]?'antes':'después'}<b>${dd.getUTCDate()} ${MES[dd.getUTCMonth()]}</b></th>`;});
+  h+=`<th class="ct">Veces<small>en el mes</small></th>${ext?'<th class="ct">Total<small>visible</small></th>':''}</tr></thead><tbody>`;
+  const T={};cols.forEach(d=>T[d]=effT(d));
   [6,5,4,3,2,1,0].forEach(r=>{
     const g=V.filter(v=>rng(v)===r);if(!g.length)return;
-    h+=`<tr class="gh"><th colspan="${ss.length+2}"><span>${RANGO[r]}</span></th></tr>`;
+    h+=`<tr class="gh"><th colspan="${cols.length+2+(ext?1:0)}"><span>${RANGO[r]}</span></th></tr>`;
     g.forEach(v=>{
       const n=cnt.get(v.i)||0;
       h+=`<tr class="vr ${kcls(n)}"><th class="nm"><span class="n"><span>${esc(v.n)} <span class="rg ${REG[rng(v)]}">${RSH[rng(v)]}</span>${(()=>{const r=Risk.get(v.i);return r&&r.lvl==='hi'?`<span class="rk-hi" title="${esc(r.text)}">▲ Riesgo alto</span>`:'';})()}</span><b class="mc">${n}</b></span><small title="Harmony: ${armLong(arm(v))} · Stage Presence: ${LVL[pres(v)]} · Level: ${LVL[dev(v)]}">${codes(v)}${v.lead?'<span class="ld">dirige</span>':''}</small></th>`;
-      ss.forEach(d=>{
+      cols.forEach(d=>{
         const t=T[d],isL=t.l===v.i,isM=t.m.includes(v.i),o=outOn(v,d),bk=o&&!o.part&&!isL&&!isM;
-        const c=['c'];if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
-        const tip=`${v.n} · ${fmtDay(d)} · `+(bk?'Blockout: no disponible':isL?'Líder':isM?'Voces':'Toca para agregar')+(o&&o.part?` · parte del día (${o.lab})`:'')+(o&&!o.part&&(isL||isM)?' · ¡tiene blockout!':'')+(pco[d].has(v.i)?' · ya en Planning Center':'');
+        const c=['c'];if(!inMon.has(d))c.push('ext');if(t.real)c.push('real');if(xc(d).trim()&&inMon.has(d))c.push(xc(d).trim());if(isL)c.push('ld');else if(isM)c.push('on');if(bk)c.push('bk');if(o&&o.part)c.push('pt');if(pco[d].has(v.i))c.push('pc');if(d<TODAY)c.push('past');
+        const tip=`${v.n} · ${fmtDay(d)} · `+(bk?'Blockout: no disponible':isL?'Líder':isM?'Voces':'Toca para agregar')+(o&&o.part?` · parte del día (${o.lab})`:'')+(o&&!o.part&&(isL||isM)?' · ¡tiene blockout!':'')+(pco[d].has(v.i)?' · ya en Planning Center':'')+(t.real?' · lo que quedó en Planning Center':'');
         h+=`<td class="${c.join(' ')}" data-d="${d}" data-i="${v.i}" title="${esc(tip)}"><span>${isL?'★':isM?'✓':''}</span></td>`;
       });
-      h+=`<td class="tot"><b>${n}</b></td></tr>`;
+      h+=`<td class="tot"><b>${n}</b></td>${ext?`<td class="tot all"><b>${cntAll.get(v.i)||0}</b></td>`:''}</tr>`;
     });
   });
   h+='</tbody><tfoot><tr><th class="nm">Voces</th>';
-  ss.forEach(d=>{const t=T[d],n=(t.l!==null?1:0)+t.m.length;h+=`<td><span class="cnt${n===size?' full':n>size?' over':''}">${n}/${size}</span>${t.l===null&&n?'<div class="noL">sin líder</div>':''}</td>`;});
-  h+='<td></td></tr><tr><th class="nm">Balance</th>';
+  cols.forEach(d=>{const t=T[d],n=(t.l!==null?1:0)+t.m.length;h+=`<td class="${xc(d).trim()}"><span class="cnt${n===size?' full':n>size?' over':''}">${n}/${size}</span>${t.l===null&&n?'<div class="noL">sin líder</div>':''}</td>`;});
+  h+=`<td></td>${ext?'<td></td>':''}</tr><tr><th class="nm">Balance</th>`;
   const LB={r:'Rango',a:'Armonía',l:'Level',s:'Stage'};
-  ss.forEach(d=>{const t=T[d],ids=t.l!==null?[t.l,...t.m]:t.m,q=quick(ids,t.l);
-    h+=`<td>${q?`<div class="bl">${Object.keys(LB).map(k=>`<i class="${q[k]}" title="${LB[k]}: ${q[k]==='ok'?'bien':q[k]==='wn'?'revisar':'sin datos'}">${q[k]==='ok'?'✓':q[k]==='wn'?'!':'·'} ${LB[k]}</i>`).join('')}</div>`:'<span class="dim">—</span>'}</td>`;});
-  h+='<td></td></tr></tfoot></table>';
+  cols.forEach(d=>{const t=T[d],ids=t.l!==null?[t.l,...t.m]:t.m,q=quick(ids,t.l);
+    h+=`<td class="${xc(d).trim()}">${q?`<div class="bl">${Object.keys(LB).map(k=>`<i class="${q[k]}" title="${LB[k]}: ${q[k]==='ok'?'bien':q[k]==='wn'?'revisar':'sin datos'}">${q[k]==='ok'?'✓':q[k]==='wn'?'!':'·'} ${LB[k]}</i>`).join('')}</div>`:'<span class="dim">—</span>'}</td>`;});
+  h+=`<td></td>${ext?'<td></td>':''}</tr></tfoot></table>`;
   M$('#mgrid').innerHTML=h;
 }
 function mtoast(t){const el=M$('#mtoast');el.textContent=t;clearTimeout(mtoast.t);mtoast.t=setTimeout(()=>el.textContent='',4000);}
 function cycle(d,i){
-  const v=VI.get(i),t=getT(d);
+  const v=VI.get(i),t=effT(d);
   if(t.l===i){t.l=null;}
   else if(t.m.includes(i)){t.m=t.m.filter(x=>x!==i);if(t.l!==null)t.m.push(t.l);t.l=i;}
   else{if(blocked(v,d))return;t.m.push(i);}
@@ -1708,23 +1732,31 @@ function suggestMonth(){
   const cnt=monthCounts(sundays(mon)), lcnt=new Map();
   sundays(mon).forEach(d=>{const t=getT(d);if(t.l!==null)lcnt.set(t.l,(lcnt.get(t.l)||0)+1);});
   const mpen=n=>n===0?2.2:n===1?1.6:n===2?-3:-8;
-  let prevL=null;
+  const near=(i,d)=>[add(d,-7),add(d,7)].filter(x=>{const t=effT(x);return t.l===i||t.m.includes(i);}).length;
+  // 1) líderes de todos los domingos primero (rotando, sin pasar de 2 en el mes ni repetir domingos seguidos)
+  const TS={};ss.forEach(d=>TS[d]=getT(d));
+  let prevL=effT(add(ss[0],-7)).l;
   ss.forEach(d=>{
-    const t=getT(d);
+    const t=TS[d];
     if(t.l===null){
       const cands=V.filter(v=>v.lead&&!blocked(v,d)&&!t.m.includes(v.i));
       const pool=cands.length?cands:V.filter(v=>v.lead&&!blocked(v,d));
       if(pool.length){
-        pool.sort((a,b)=>(lcnt.get(a.i)||0)-(lcnt.get(b.i)||0)||((a.i===prevL)-(b.i===prevL))||(cnt.get(a.i)||0)-(cnt.get(b.i)||0)||c8(a)-c8(b)||byName(a,b));
+        pool.sort((a,b)=>((cnt.get(a.i)||0)>=2)-((cnt.get(b.i)||0)>=2)||(lcnt.get(a.i)||0)-(lcnt.get(b.i)||0)||((a.i===prevL)-(b.i===prevL))||(cnt.get(a.i)||0)-(cnt.get(b.i)||0)||c8(a)-c8(b)||byName(a,b));
         const L=pool[0].i;t.m=t.m.filter(x=>x!==L);t.l=L;lcnt.set(L,(lcnt.get(L)||0)+1);cnt.set(L,(cnt.get(L)||0)+1);
+        setT(d,t);
       }
     }
     prevL=t.l;
+  });
+  // 2) voces de cada domingo
+  ss.forEach(d=>{
+    const t=TS[d];
     const team=t.l!==null?[t.l,...t.m]:[...t.m];
     let pool=V.filter(v=>!team.includes(v.i)&&!blocked(v,d)&&!outOn(v,d));
     while(team.length<size&&pool.length){
       let best=null,bs=-1e9;
-      pool.forEach(v=>{const sc=score([...team,v.i],t.l,true)+mpen(cnt.get(v.i)||0)-c8(v)*.05;if(sc>bs||(sc===bs&&byName(v,best)<0)){bs=sc;best=v;}});
+      pool.forEach(v=>{const sc=score([...team,v.i],t.l,true)+mpen(cnt.get(v.i)||0)-near(v.i,d)*1.2-c8(v)*.05;if(sc>bs||(sc===bs&&byName(v,best)<0)){bs=sc;best=v;}});
       team.push(best.i);t.m.push(best.i);cnt.set(best.i,(cnt.get(best.i)||0)+1);pool=pool.filter(v=>v!==best);
     }
     setT(d,t);
@@ -1733,7 +1765,7 @@ function suggestMonth(){
 }
 function pcoMonth(){
   let n=0;
-  sundays(mon).forEach(d=>{const t=getT(d);if(t.l!==null||t.m.length)return;const L=pcoOn(d).filter(o=>VI.has(o.i));if(!L.length)return;
+  visibleSundays().all.forEach(d=>{if(d<TODAY)return;const t=getT(d);if(t.l!==null||t.m.length)return;const L=pcoOn(d).filter(o=>VI.has(o.i));if(!L.length)return;
     const l=L.find(o=>o.lead);setT(d,{l:l?l.i:null,m:L.filter(o=>o!==l).map(o=>o.i)});n++;});
   renderMonth();mtoast(n?`Se cargaron ${n} domingo${n>1?'s':''} desde Planning Center (los que ya tenían plan no se tocaron).`:'Los domingos con programación en Planning Center ya tienen plan aquí.');
 }
@@ -1772,6 +1804,8 @@ function importPlan(code){
 }
 M$('#mmprev').onclick=()=>{const [y,m]=mon.split('-').map(Number);mon=iso(new Date(Date.UTC(y,m-2,1))).slice(0,7);store.set('mon',mon);renderMonth();};
 M$('#mmnext').onclick=()=>{const [y,m]=mon.split('-').map(Number);mon=iso(new Date(Date.UTC(y,m,1))).slice(0,7);store.set('mon',mon);renderMonth();};
+document.getElementById('mbefore').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;wBefore=+b.dataset.n;store.set('mb',wBefore);renderMonth();});
+document.getElementById('mafter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;wAfter=+b.dataset.n;store.set('ma',wAfter);renderMonth();});
 document.getElementById('msize').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;size=+b.dataset.n;store.set('size',size);renderMonth();});
 M$('#mgrid').addEventListener('click',e=>{
   const th=e.target.closest('th.sd');if(th){date=th.dataset.d;store.set('date',date);loadDraft();window.NW_go('arm');return;}
